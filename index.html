@@ -884,8 +884,10 @@
                                 <th>Status</th>
                                 <th>Wage Rate</th>
                                 <th>Paid (₹)</th>
-                                <th>Balance</th>
+                                <th>Day Balance</th>
+                                <th>Total Wage</th>
                                 <th>Total Paid</th>
+                                <th>Net Balance</th>
                                 <th>Profile</th>
                             </tr>
                         </thead>
@@ -922,9 +924,10 @@
                 <button class="profile-close-btn" id="profileCloseBtn"><i class="fas fa-xmark"></i> Close</button>
             </div>
             <div class="profile-summary">
+                <div>Total Wage <span class="value gold" id="profileTotalWage">₹ 0</span></div>
                 <div>Total Paid <span class="value" id="profileTotalPaid">₹ 0</span></div>
                 <div>Advance <span class="value" id="profileAdvance">₹ 0</span></div>
-                <div>Balance <span class="value" id="profileBalance">₹ 0</span></div>
+                <div>Net Balance <span class="value" id="profileBalance">₹ 0</span></div>
             </div>
             <div class="month-nav">
                 <button id="prevMonthBtn"><i class="fas fa-chevron-left"></i> Prev</button>
@@ -1002,6 +1005,7 @@
         const profileCloseBtn = document.getElementById('profileCloseBtn');
         const profileWorkerName = document.getElementById('profileWorkerName');
         const profileWorkerRole = document.getElementById('profileWorkerRole');
+        const profileTotalWage = document.getElementById('profileTotalWage');
         const profileTotalPaid = document.getElementById('profileTotalPaid');
         const profileAdvance = document.getElementById('profileAdvance');
         const profileBalance = document.getElementById('profileBalance');
@@ -1247,19 +1251,10 @@
         }
 
         // ============================================================
-        //  BALANCE CALCULATION - FIXED LOGIC
+        //  CALCULATION FUNCTIONS - CORRECT LOGIC
         // ============================================================
-        function calculateTotalPaid(workerId) {
-            // Sum ALL payments from ALL attendance records
-            const atts = attendanceMap[workerId] || {};
-            let total = 0;
-            for (const date in atts) {
-                const entry = atts[date];
-                total += entry.payment || 0;
-            }
-            return total;
-        }
-
+        
+        // Get wage rate for a specific day based on status
         function getWageRate(workerId, date) {
             const worker = workers.find(w => w.id === workerId);
             if (!worker) return 0;
@@ -1269,17 +1264,41 @@
             return worker.daily_rate || 0;
         }
 
+        // Calculate TOTAL WAGE (sum of all wage rates)
+        function calculateTotalWage(workerId) {
+            const atts = attendanceMap[workerId] || {};
+            let total = 0;
+            for (const date in atts) {
+                total += getWageRate(workerId, date);
+            }
+            return total;
+        }
+
+        // Calculate TOTAL PAID (sum of all payments)
+        function calculateTotalPaid(workerId) {
+            const atts = attendanceMap[workerId] || {};
+            let total = 0;
+            for (const date in atts) {
+                total += atts[date].payment || 0;
+            }
+            return total;
+        }
+
+        // Calculate NET BALANCE = Total Wage - Total Paid - Advance
+        function getNetBalance(workerId) {
+            const worker = workers.find(w => w.id === workerId);
+            if (!worker) return 0;
+            const totalWage = calculateTotalWage(workerId);
+            const totalPaid = calculateTotalPaid(workerId);
+            const advance = worker.advance || 0;
+            return totalWage - totalPaid - advance;
+        }
+
+        // Get day balance for a specific date
         function getDayBalance(workerId, date) {
             const wage = getWageRate(workerId, date);
             const paid = attendanceMap[workerId]?.[date]?.payment || 0;
             return wage - paid;
-        }
-
-        function getWorkerBalance(workerId) {
-            const totalPaid = calculateTotalPaid(workerId);
-            const worker = workers.find(w => w.id === workerId);
-            const advance = worker?.advance || 0;
-            return totalPaid - advance;
         }
 
         // ============================================================
@@ -1288,7 +1307,7 @@
         function renderManageTable() {
             let html = '';
             workers.forEach(w => {
-                const balance = getWorkerBalance(w.id);
+                const netBalance = getNetBalance(w.id);
                 html += `
                     <tr>
                         <td><span class="worker-name"><i class="fas fa-user"></i> ${w.name}</span></td>
@@ -1354,16 +1373,12 @@
                 const paid = att.payment || 0;
                 const wageRate = getWageRate(w.id, todayStr2);
                 const dayBalance = wageRate - paid;
+                const totalWage = calculateTotalWage(w.id);
                 const totalPaid = calculateTotalPaid(w.id);
-                const overallBalance = totalPaid - (w.advance || 0);
+                const netBalance = totalWage - totalPaid - (w.advance || 0);
 
-                let balanceClass = 'balance-zero';
-                if (dayBalance > 0) balanceClass = 'balance-positive';
-                else if (dayBalance < 0) balanceClass = 'balance-negative';
-
-                let totalPaidClass = 'balance-zero';
-                if (overallBalance > 0) totalPaidClass = 'balance-positive';
-                else if (overallBalance < 0) totalPaidClass = 'balance-negative';
+                let dayBalClass = dayBalance > 0 ? 'balance-positive' : (dayBalance < 0 ? 'balance-negative' : 'balance-zero');
+                let netBalClass = netBalance > 0 ? 'balance-positive' : (netBalance < 0 ? 'balance-negative' : 'balance-zero');
 
                 html += `
                     <tr>
@@ -1377,8 +1392,10 @@
                         </td>
                         <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
                         <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" /></td>
-                        <td><span class="balance-amount ${balanceClass}">${dayBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(dayBalance)}</span></td>
-                        <td><span class="balance-amount ${totalPaidClass}">₹ ${totalPaid}</span></td>
+                        <td><span class="balance-amount ${dayBalClass}">${dayBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(dayBalance)}</span></td>
+                        <td><span class="balance-amount balance-zero">₹ ${totalWage}</span></td>
+                        <td><span class="balance-amount balance-zero">₹ ${totalPaid}</span></td>
+                        <td><span class="balance-amount ${netBalClass}">${netBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(netBalance)}</span></td>
                         <td><button class="profile-btn" data-id="${w.id}"><i class="fas fa-address-card"></i> View</button></td>
                     </tr>
                 `;
@@ -1597,14 +1614,16 @@
             const w = workers.find(w => w.id === workerId);
             if (!w) return;
             
+            const totalWage = calculateTotalWage(workerId);
             const totalPaid = calculateTotalPaid(workerId);
             const adv = w.advance || 0;
-            const balance = totalPaid - adv;
+            const netBalance = totalWage - totalPaid - adv;
             
+            profileTotalWage.textContent = `₹ ${totalWage.toLocaleString()}`;
             profileTotalPaid.textContent = `₹ ${totalPaid.toLocaleString()}`;
             profileAdvance.textContent = `₹ ${adv.toLocaleString()}`;
-            profileBalance.textContent = `₹ ${balance.toLocaleString()}`;
-            profileBalance.style.color = balance >= 0 ? '#4caf50' : '#f44336';
+            profileBalance.textContent = `₹ ${netBalance.toLocaleString()}`;
+            profileBalance.style.color = netBalance >= 0 ? '#4caf50' : '#f44336';
         }
 
         function renderCalendar(workerId) {
@@ -1754,7 +1773,8 @@
                                 date: date,
                                 status: attendanceMap[workerId][date].status || 'present',
                                 payment: attendanceMap[workerId][date].payment || 0,
-                                remark: remark                            }]);
+                                remark: remark
+                            }]);
                             showToast('Remark saved successfully', 'success');
                         } catch (error) {
                             showToast('Failed to save remark: ' + error.message, 'error');

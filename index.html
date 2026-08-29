@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <!-- Supabase JS - Using CDN with specific version -->
+    <!-- Supabase JS - Using specific version -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <style>
-        /* ... (all your existing styles remain the same) ... */
+        /* ===== ALL STYLES (same as before) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -41,6 +41,7 @@
             justify-content: center;
             padding: 2.5rem 1.5rem 3rem;
             background: #141e2a;
+            min-height: 500px;
         }
         .login-brand h1 {
             font-size: 2.2rem;
@@ -100,8 +101,30 @@
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
+            position: relative;
         }
-        .login-btn:hover { background: #f0c87d; transform: scale(1.01); box-shadow: 0 8px 20px rgba(232,184,109,0.25); }
+        .login-btn:hover:not(:disabled) { background: #f0c87d; transform: scale(1.01); }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .login-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #0b1219;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        .login-btn.loading .spinner {
+            display: inline-block;
+        }
+        .login-btn.loading .btn-text {
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
         .login-error {
             color: #f3a6a6;
             background: #3a1e1e;
@@ -693,25 +716,19 @@
             .logout-btn { justify-content: center; }
             .calendar-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #2f4458;
-            border-radius: 50%;
-            border-top-color: #e8b86d;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* LOADING OVERLAY - FIXED */
         .loading-overlay {
+            display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(8,14,22,0.7);
-            display: none;
+            background: rgba(8,14,22,0.8);
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            flex-direction: column;
+            gap: 1rem;
         }
         .loading-overlay .spinner {
             width: 50px;
@@ -721,12 +738,42 @@
             border-top-color: #e8b86d;
             animation: spin 1s ease-in-out infinite;
         }
+        .loading-overlay .loading-text {
+            color: #c6d9e8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .loading-overlay .loading-timeout {
+            color: #f3a6a6;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .loading-overlay.show-timeout .loading-timeout {
+            display: block;
+        }
+        .loading-overlay .retry-btn {
+            background: #e8b86d;
+            border: none;
+            color: #0b1219;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .loading-overlay.show-timeout .retry-btn {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
+    <!-- Loading Overlay - FIXED with timeout -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Loading...</div>
+        <div class="loading-timeout">⏱️ Taking longer than expected...<br>Please check your internet connection.</div>
+        <button class="retry-btn" id="retryBtn">🔄 Retry</button>
     </div>
 
     <div class="app-container">
@@ -741,8 +788,14 @@
                 <input type="email" id="emailInput" placeholder="your@email.com" value="admin@jaiswal.com" />
                 <label><i class="fas fa-lock"></i> Password</label>
                 <input type="password" id="passwordInput" placeholder="••••••••" value="Jaiswal@123" />
-                <button class="login-btn" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Sign in</button>
-                <div class="login-error" id="loginError"><i class="fas fa-circle-exclamation"></i> Invalid credentials</div>
+                <button class="login-btn" id="loginBtn">
+                    <span class="spinner"></span>
+                    <span class="btn-text"><i class="fas fa-arrow-right-to-bracket"></i> Sign in</span>
+                </button>
+                <div class="login-error" id="loginError"><i class="fas fa-circle-exclamation"></i> <span id="errorText">Invalid credentials</span></div>
+                <div style="margin-top:1.2rem; font-size:0.75rem; color:#6a859e; text-align:center;">
+                    Demo: admin@jaiswal.com / Jaiswal@123
+                </div>
             </div>
         </div>
 
@@ -839,14 +892,19 @@
         const SUPABASE_URL = 'https://cvfhkoeyqbtoezdbdaac.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_08z68ANZXn5bOYELHVPSwA_Pi6Za1h4';
 
-        // Initialize Supabase client with proper error handling
+        // Initialize Supabase client
         let supabaseClient = null;
         try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('✅ Supabase client initialized successfully');
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true,
+                    detectSessionInUrl: true
+                }
+            });
+            console.log('✅ Supabase client initialized');
         } catch (error) {
-            console.error('❌ Failed to initialize Supabase client:', error);
-            alert('Failed to initialize Supabase. Please refresh the page.');
+            console.error('❌ Failed to initialize Supabase:', error);
         }
 
         // ============================================================
@@ -858,6 +916,8 @@
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let editingWorkerId = null;
+        let loadingTimeoutId = null;
+        let isTimeoutShown = false;
 
         // ============================================================
         //  DOM REFS
@@ -869,8 +929,11 @@
         const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
         const loginError = document.getElementById('loginError');
+        const errorText = document.getElementById('errorText');
         const userEmailSpan = document.getElementById('userEmail');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const retryBtn = document.getElementById('retryBtn');
 
         const tbody = document.getElementById('workerTableBody');
         const manageTbody = document.getElementById('manageTableBody');
@@ -903,41 +966,73 @@
         const nextMonthBtn = document.getElementById('nextMonthBtn');
 
         // ============================================================
-        //  UTILITY FUNCTIONS
+        //  LOADING OVERLAY WITH TIMEOUT
         // ============================================================
-        function showLoading() { loadingOverlay.style.display = 'flex'; }
-        function hideLoading() { loadingOverlay.style.display = 'none'; }
-
-        function getTodayStr() {
-            return new Date().toISOString().split('T')[0];
+        function showLoading(message = 'Loading...') {
+            loadingText.textContent = message;
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.classList.remove('show-timeout');
+            isTimeoutShown = false;
+            
+            // Clear any existing timeout
+            if (loadingTimeoutId) {
+                clearTimeout(loadingTimeoutId);
+                loadingTimeoutId = null;
+            }
+            
+            // Set timeout for 8 seconds
+            loadingTimeoutId = setTimeout(() => {
+                if (loadingOverlay.style.display === 'flex') {
+                    loadingOverlay.classList.add('show-timeout');
+                    isTimeoutShown = true;
+                }
+            }, 8000);
         }
 
-        function formatDate(dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+            loadingOverlay.classList.remove('show-timeout');
+            if (loadingTimeoutId) {
+                clearTimeout(loadingTimeoutId);
+                loadingTimeoutId = null;
+            }
+            isTimeoutShown = false;
         }
+
+        // Retry button handler
+        retryBtn.addEventListener('click', () => {
+            loadingOverlay.classList.remove('show-timeout');
+            loadingText.textContent = 'Retrying...';
+            // Reload the page to retry
+            window.location.reload();
+        });
 
         // ============================================================
         //  AUTHENTICATION FUNCTIONS
         // ============================================================
         async function loginWithSupabase(email, password) {
             try {
-                showLoading();
-                console.log('🔐 Attempting login for:', email);
+                showLoading('Signing in...');
                 
                 if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
                 
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                // Set a timeout for the login request
+                const loginPromise = supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
                 
-                if (error) {
-                    console.error('❌ Login error:', error);
-                    throw error;
-                }
+                // Race against timeout
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Login request timed out. Please check your internet connection.')), 15000);
+                });
+                
+                const result = await Promise.race([loginPromise, timeoutPromise]);
+                const { data, error } = result;
+                
+                if (error) throw error;
                 
                 console.log('✅ Login successful:', data.user.email);
                 return { success: true, user: data.user };
@@ -951,7 +1046,7 @@
 
         async function logoutFromSupabase() {
             try {
-                showLoading();
+                showLoading('Logging out...');
                 if (supabaseClient) {
                     await supabaseClient.auth.signOut();
                 }
@@ -986,28 +1081,58 @@
         }
 
         // ============================================================
-        //  DATA OPERATIONS
+        //  DATA OPERATIONS WITH TIMEOUT
         // ============================================================
+        async function fetchWithTimeout(promise, timeoutMs = 15000) {
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), timeoutMs);
+            });
+            return Promise.race([promise, timeoutPromise]);
+        }
+
         async function loadWorkersFromSupabase() {
             try {
-                showLoading();
+                showLoading('Loading workers...');
                 if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
                 
-                const { data, error } = await supabaseClient
-                    .from('workers')
-                    .select('*')
-                    .order('id');
-                    
+                const result = await fetchWithTimeout(
+                    supabaseClient.from('workers').select('*').order('id'),
+                    15000
+                );
+                
+                const { data, error } = result;
                 if (error) throw error;
                 workers = data || [];
                 console.log(`📊 Loaded ${workers.length} workers`);
                 return workers;
             } catch (error) {
                 console.error('❌ Error loading workers:', error.message);
-                alert('Failed to load workers: ' + error.message);
-                return [];
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadAllAttendance() {
+            try {
+                showLoading('Loading attendance records...');
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const result = await fetchWithTimeout(
+                    supabaseClient.from('attendance').select('*'),
+                    15000
+                );
+                
+                const { data, error } = result;
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error('❌ Error loading attendance:', error.message);
+                throw error;
             } finally {
                 hideLoading();
             }
@@ -1019,11 +1144,12 @@
                     throw new Error('Supabase client not initialized');
                 }
                 
-                const { data, error } = await supabaseClient
-                    .from('attendance')
-                    .select('*')
-                    .eq('worker_id', workerId);
-                    
+                const result = await fetchWithTimeout(
+                    supabaseClient.from('attendance').select('*').eq('worker_id', workerId),
+                    10000
+                );
+                
+                const { data, error } = result;
                 if (error) throw error;
                 return data || [];
             } catch (error) {
@@ -1032,59 +1158,47 @@
             }
         }
 
-        async function loadAllAttendance() {
-            try {
-                if (!supabaseClient) {
-                    throw new Error('Supabase client not initialized');
-                }
-                
-                const { data, error } = await supabaseClient
-                    .from('attendance')
-                    .select('*');
-                    
-                if (error) throw error;
-                return data || [];
-            } catch (error) {
-                console.error('❌ Error loading all attendance:', error.message);
-                return [];
-            }
-        }
-
         async function saveWorkerToSupabase(worker) {
             try {
-                showLoading();
+                showLoading('Saving worker...');
                 if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
                 
                 let result;
                 if (worker.id) {
-                    const { data, error } = await supabaseClient
-                        .from('workers')
-                        .update({
-                            name: worker.name,
-                            role: worker.role,
-                            daily_rate: worker.daily_rate,
-                            advance: worker.advance,
-                            total_paid: worker.total_paid || 0
-                        })
-                        .eq('id', worker.id)
-                        .select();
-                        
+                    const queryResult = await fetchWithTimeout(
+                        supabaseClient
+                            .from('workers')
+                            .update({
+                                name: worker.name,
+                                role: worker.role,
+                                daily_rate: worker.daily_rate,
+                                advance: worker.advance,
+                                total_paid: worker.total_paid || 0
+                            })
+                            .eq('id', worker.id)
+                            .select(),
+                        10000
+                    );
+                    const { data, error } = queryResult;
                     if (error) throw error;
                     result = data[0];
                 } else {
-                    const { data, error } = await supabaseClient
-                        .from('workers')
-                        .insert({
-                            name: worker.name,
-                            role: worker.role,
-                            daily_rate: worker.daily_rate,
-                            advance: worker.advance || 0,
-                            total_paid: worker.total_paid || 0
-                        })
-                        .select();
-                        
+                    const queryResult = await fetchWithTimeout(
+                        supabaseClient
+                            .from('workers')
+                            .insert({
+                                name: worker.name,
+                                role: worker.role,
+                                daily_rate: worker.daily_rate,
+                                advance: worker.advance || 0,
+                                total_paid: worker.total_paid || 0
+                            })
+                            .select(),
+                        10000
+                    );
+                    const { data, error } = queryResult;
                     if (error) throw error;
                     result = data[0];
                 }
@@ -1092,7 +1206,6 @@
                 return result;
             } catch (error) {
                 console.error('❌ Error saving worker:', error.message);
-                alert('Failed to save worker: ' + error.message);
                 throw error;
             } finally {
                 hideLoading();
@@ -1101,29 +1214,29 @@
 
         async function deleteWorkerFromSupabase(id) {
             try {
-                showLoading();
+                showLoading('Deleting worker...');
                 if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
                 
-                const { error: attError } = await supabaseClient
-                    .from('attendance')
-                    .delete()
-                    .eq('worker_id', id);
-                    
-                if (attError) throw attError;
+                // Delete attendance first
+                const attResult = await fetchWithTimeout(
+                    supabaseClient.from('attendance').delete().eq('worker_id', id),
+                    10000
+                );
+                if (attResult.error) throw attResult.error;
 
-                const { error } = await supabaseClient
-                    .from('workers')
-                    .delete()
-                    .eq('id', id);
-                    
-                if (error) throw error;
+                // Delete worker
+                const result = await fetchWithTimeout(
+                    supabaseClient.from('workers').delete().eq('id', id),
+                    10000
+                );
+                if (result.error) throw result.error;
+                
                 console.log(`🗑️ Deleted worker ID: ${id}`);
                 return { success: true };
             } catch (error) {
                 console.error('❌ Error deleting worker:', error.message);
-                alert('Failed to delete worker: ' + error.message);
                 throw error;
             } finally {
                 hideLoading();
@@ -1132,25 +1245,28 @@
 
         async function saveAttendanceToSupabase(attendanceData) {
             try {
-                showLoading();
+                showLoading('Saving attendance...');
                 if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
                 
-                const { data, error } = await supabaseClient
-                    .from('attendance')
-                    .upsert(attendanceData, {
-                        onConflict: 'worker_id,date',
-                        ignoreDuplicates: false
-                    })
-                    .select();
-                    
+                const result = await fetchWithTimeout(
+                    supabaseClient
+                        .from('attendance')
+                        .upsert(attendanceData, {
+                            onConflict: 'worker_id,date',
+                            ignoreDuplicates: false
+                        })
+                        .select(),
+                    10000
+                );
+                
+                const { data, error } = result;
                 if (error) throw error;
-                console.log(`💾 Saved attendance for ${attendanceData.length} records`);
+                console.log(`💾 Saved ${attendanceData.length} attendance records`);
                 return data;
             } catch (error) {
                 console.error('❌ Error saving attendance:', error.message);
-                alert('Failed to save attendance: ' + error.message);
                 throw error;
             } finally {
                 hideLoading();
@@ -1158,7 +1274,7 @@
         }
 
         // ============================================================
-        //  RENDER FUNCTIONS
+        //  RENDER FUNCTIONS (same as before)
         // ============================================================
         function renderManageTable() {
             let html = '';
@@ -1268,16 +1384,19 @@
                         attendanceMap[id][todayStr].payment = w?.daily_rate || 0;
                     }
 
-                    await saveAttendanceToSupabase([{
-                        worker_id: id,
-                        date: todayStr,
-                        status: attendanceMap[id][todayStr].status,
-                        payment: attendanceMap[id][todayStr].payment,
-                        remark: attendanceMap[id][todayStr].remark || ''
-                    }]);
-
-                    renderDailyTable();
-                    renderManageTable();
+                    try {
+                        await saveAttendanceToSupabase([{
+                            worker_id: id,
+                            date: todayStr,
+                            status: attendanceMap[id][todayStr].status,
+                            payment: attendanceMap[id][todayStr].payment,
+                            remark: attendanceMap[id][todayStr].remark || ''
+                        }]);
+                        renderDailyTable();
+                        renderManageTable();
+                    } catch (error) {
+                        alert('Failed to save attendance: ' + error.message);
+                    }
                 });
             });
 
@@ -1294,16 +1413,19 @@
                     }
                     attendanceMap[id][todayStr].payment = val;
 
-                    await saveAttendanceToSupabase([{
-                        worker_id: id,
-                        date: todayStr,
-                        status: attendanceMap[id][todayStr].status || 'present',
-                        payment: val,
-                        remark: attendanceMap[id][todayStr].remark || ''
-                    }]);
-
-                    renderDailyTable();
-                    renderManageTable();
+                    try {
+                        await saveAttendanceToSupabase([{
+                            worker_id: id,
+                            date: todayStr,
+                            status: attendanceMap[id][todayStr].status || 'present',
+                            payment: val,
+                            remark: attendanceMap[id][todayStr].remark || ''
+                        }]);
+                        renderDailyTable();
+                        renderManageTable();
+                    } catch (error) {
+                        alert('Failed to save payment: ' + error.message);
+                    }
                 });
             });
 
@@ -1332,7 +1454,7 @@
                 delete attendanceMap[id];
                 fullRender();
             } catch (error) {
-                // Error already handled in deleteWorkerFromSupabase
+                alert('Failed to delete worker: ' + error.message);
             }
         }
 
@@ -1409,7 +1531,7 @@
                 workerModal.style.display = 'none';
                 fullRender();
             } catch (error) {
-                // Error already handled in saveWorkerToSupabase
+                alert('Failed to save worker: ' + error.message);
             }
         }
 
@@ -1423,15 +1545,19 @@
             profileWorkerName.textContent = w.name;
             profileWorkerRole.textContent = w.role;
 
-            const attData = await loadAttendanceForWorker(workerId);
-            if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-            attData.forEach(att => {
-                attendanceMap[workerId][att.date] = {
-                    status: att.status,
-                    payment: att.payment || 0,
-                    remark: att.remark || ''
-                };
-            });
+            try {
+                const attData = await loadAttendanceForWorker(workerId);
+                if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+                attData.forEach(att => {
+                    attendanceMap[workerId][att.date] = {
+                        status: att.status,
+                        payment: att.payment || 0,
+                        remark: att.remark || ''
+                    };
+                });
+            } catch (error) {
+                console.error('Error loading attendance for profile:', error);
+            }
 
             const totalPaid = w.total_paid || 0;
             const adv = w.advance || 0;
@@ -1519,19 +1645,23 @@
                         else if (newStatus === 'half') attendanceMap[workerId][date].payment = Math.round((ww?.daily_rate || 0) * 0.5);
                         else attendanceMap[workerId][date].payment = ww?.daily_rate || 0;
 
-                        await saveAttendanceToSupabase([{
-                            worker_id: workerId,
-                            date: date,
-                            status: newStatus,
-                            payment: attendanceMap[workerId][date].payment || 0,
-                            remark: attendanceMap[workerId][date].remark || ''
-                        }]);
+                        try {
+                            await saveAttendanceToSupabase([{
+                                worker_id: workerId,
+                                date: date,
+                                status: newStatus,
+                                payment: attendanceMap[workerId][date].payment || 0,
+                                remark: attendanceMap[workerId][date].remark || ''
+                            }]);
 
-                        const todayStr = getTodayStr();
-                        if (date === todayStr) {
-                            fullRender();
+                            const todayStr = getTodayStr();
+                            if (date === todayStr) {
+                                fullRender();
+                            }
+                            renderCalendar(workerId);
+                        } catch (error) {
+                            alert('Failed to save attendance: ' + error.message);
                         }
-                        renderCalendar(workerId);
                     });
                 });
 
@@ -1547,19 +1677,23 @@
                             attendanceMap[workerId][date].payment = val;
                         }
 
-                        await saveAttendanceToSupabase([{
-                            worker_id: workerId,
-                            date: date,
-                            status: attendanceMap[workerId][date].status || 'present',
-                            payment: val,
-                            remark: attendanceMap[workerId][date].remark || ''
-                        }]);
+                        try {
+                            await saveAttendanceToSupabase([{
+                                worker_id: workerId,
+                                date: date,
+                                status: attendanceMap[workerId][date].status || 'present',
+                                payment: val,
+                                remark: attendanceMap[workerId][date].remark || ''
+                            }]);
 
-                        const todayStr = getTodayStr();
-                        if (date === todayStr) {
-                            fullRender();
+                            const todayStr = getTodayStr();
+                            if (date === todayStr) {
+                                fullRender();
+                            }
+                            renderCalendar(workerId);
+                        } catch (error) {
+                            alert('Failed to save payment: ' + error.message);
                         }
-                        renderCalendar(workerId);
                     });
                 }
 
@@ -1574,13 +1708,17 @@
                             attendanceMap[workerId][date].remark = remark;
                         }
 
-                        await saveAttendanceToSupabase([{
-                            worker_id: workerId,
-                            date: date,
-                            status: attendanceMap[workerId][date].status || 'present',
-                            payment: attendanceMap[workerId][date].payment || 0,
-                            remark: remark
-                        }]);
+                        try {
+                            await saveAttendanceToSupabase([{
+                                worker_id: workerId,
+                                date: date,
+                                status: attendanceMap[workerId][date].status || 'present',
+                                payment: attendanceMap[workerId][date].payment || 0,
+                                remark: remark
+                            }]);
+                        } catch (error) {
+                            alert('Failed to save remark: ' + error.message);
+                        }
                     });
                 }
             });
@@ -1601,6 +1739,13 @@
         }
 
         // ============================================================
+        //  UTILITY FUNCTIONS
+        // ============================================================
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        // ============================================================
         //  AUTH HANDLERS
         // ============================================================
         async function handleLogin() {
@@ -1608,18 +1753,26 @@
             const password = passwordInput.value.trim();
 
             if (!email || !password) {
-                loginError.textContent = 'Please enter email and password';
+                errorText.textContent = 'Please enter email and password';
                 loginError.style.display = 'flex';
                 return;
             }
 
             if (!supabaseClient) {
-                loginError.textContent = 'Supabase client not initialized. Please refresh.';
+                errorText.textContent = 'Supabase client not initialized. Please refresh.';
                 loginError.style.display = 'flex';
                 return;
             }
 
+            // Show loading state on button
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+            loginError.style.display = 'none';
+
             const result = await loginWithSupabase(email, password);
+
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
 
             if (result.success) {
                 loginError.style.display = 'none';
@@ -1629,7 +1782,7 @@
                 await loadData();
                 fullRender();
             } else {
-                loginError.textContent = 'Login failed: ' + result.error;
+                errorText.textContent = result.error || 'Invalid credentials';
                 loginError.style.display = 'flex';
             }
         }
@@ -1639,8 +1792,8 @@
             dashboardScreen.style.display = 'none';
             loginScreen.style.display = 'flex';
             loginError.style.display = 'none';
-            emailInput.value = '';
-            passwordInput.value = '';
+            emailInput.value = 'admin@jaiswal.com';
+            passwordInput.value = 'Jaiswal@123';
             workers = [];
             attendanceMap = {};
             fullRender();
@@ -1651,7 +1804,6 @@
         // ============================================================
         async function loadData() {
             try {
-                showLoading();
                 workers = await loadWorkersFromSupabase();
 
                 const allAtt = await loadAllAttendance();
@@ -1674,20 +1826,23 @@
                             payment: w.daily_rate,
                             remark: ''
                         };
-                        await saveAttendanceToSupabase([{
-                            worker_id: w.id,
-                            date: todayStr,
-                            status: 'present',
-                            payment: w.daily_rate,
-                            remark: ''
-                        }]);
+                        try {
+                            await saveAttendanceToSupabase([{
+                                worker_id: w.id,
+                                date: todayStr,
+                                status: 'present',
+                                payment: w.daily_rate,
+                                remark: ''
+                            }]);
+                        } catch (e) {
+                            console.warn('Could not save initial attendance for', w.name, e);
+                        }
                     }
                 }
             } catch (error) {
                 console.error('❌ Error loading data:', error);
-                alert('Failed to load data. Please refresh the page.');
-            } finally {
-                hideLoading();
+                alert('Failed to load data: ' + error.message + '\n\nPlease check your internet connection and refresh.');
+                throw error;
             }
         }
 
@@ -1703,14 +1858,23 @@
                 return;
             }
 
+            // Check if user is already logged in
             const auth = await checkAuth();
             if (auth.success) {
                 console.log('✅ User already logged in, showing dashboard');
                 loginScreen.style.display = 'none';
                 dashboardScreen.style.display = 'block';
                 userEmailSpan.textContent = auth.user.email;
-                await loadData();
-                fullRender();
+                try {
+                    await loadData();
+                    fullRender();
+                } catch (error) {
+                    // If loading fails, show login screen with error
+                    loginScreen.style.display = 'flex';
+                    dashboardScreen.style.display = 'none';
+                    errorText.textContent = 'Failed to load data. Please try again.';
+                    loginError.style.display = 'flex';
+                }
             } else {
                 console.log('🔐 User not logged in, showing login screen');
                 loginScreen.style.display = 'flex';

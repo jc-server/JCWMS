@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -690,9 +692,42 @@
             .logout-btn { justify-content: center; }
             .calendar-grid { grid-template-columns: repeat(2, 1fr); }
         }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #2f4458;
+            border-radius: 50%;
+            border-top-color: #e8b86d;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(8,14,22,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-overlay .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2f4458;
+            border-radius: 50%;
+            border-top-color: #e8b86d;
+            animation: spin 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <div class="app-container">
         <!-- LOGIN -->
         <div id="loginScreen">
@@ -701,13 +736,15 @@
                 <p>Workers Management · secure</p>
             </div>
             <div class="login-box">
-                <label><i class="fas fa-user"></i> Username</label>
-                <input type="text" id="usernameInput" value="admin" />
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="emailInput" placeholder="your@email.com" value="admin@jaiswal.com" />
                 <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="passwordInput" value="jaiswal123" />
+                <input type="password" id="passwordInput" placeholder="••••••••" value="Jaiswal@123" />
                 <button class="login-btn" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Sign in</button>
-                <div class="login-error" id="loginError"><i class="fas fa-circle-exclamation"></i> Invalid</div>
-                <div style="margin-top:1.2rem; font-size:0.75rem; color:#6a859e; text-align:center;">demo: admin / jaiswal123</div>
+                <div class="login-error" id="loginError"><i class="fas fa-circle-exclamation"></i> Invalid credentials</div>
+                <div style="margin-top:1.2rem; font-size:0.75rem; color:#6a859e; text-align:center;">
+                    Demo: admin@jaiswal.com / Jaiswal@123
+                </div>
             </div>
         </div>
 
@@ -716,7 +753,8 @@
             <div class="dash-header">
                 <h2><i class="fas fa-helmet-safety"></i> Jaiswal · Workforce</h2>
                 <div style="display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center;">
-                    <span class="badge"><i class="fas fa-calendar-day"></i> <span id="todayDate">25 Aug 2026</span></span>
+                    <span class="badge"><i class="fas fa-calendar-day"></i> <span id="todayDate">Loading...</span></span>
+                    <span class="badge" id="userEmailBadge"><i class="fas fa-user"></i> <span id="userEmail">User</span></span>
                     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
             </div>
@@ -729,13 +767,13 @@
             </div>
 
             <!-- MANAGE WORKERS -->
-            <div class="manage-section" id="manageSection">
+            <div class="manage-section">
                 <div class="manage-header">
                     <div class="section-title"><i class="fas fa-users-gear"></i> Manage Workers</div>
                     <button class="add-worker-btn" id="addWorkerBtn"><i class="fas fa-plus"></i> Add Worker</button>
                 </div>
                 <div class="worker-table-wrap">
-                    <table class="manage-table" id="manageTable">
+                    <table class="manage-table">
                         <thead><tr><th>Worker</th><th>Role</th><th>Daily Rate</th><th>Advance</th><th>Actions</th></tr></thead>
                         <tbody id="manageTableBody"></tbody>
                     </table>
@@ -746,7 +784,7 @@
             <div class="worker-section">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Daily attendance & payments</div>
                 <div class="table-responsive">
-                    <table id="workerTable">
+                    <table>
                         <thead><tr><th>Worker</th><th>Attendance</th><th>Paid (₹)</th><th>Balance</th><th>Profile</th></tr></thead>
                         <tbody id="workerTableBody"></tbody>
                     </table>
@@ -778,8 +816,8 @@
     <div class="profile-page-overlay" id="profilePageOverlay">
         <div class="profile-page-card">
             <div class="profile-page-header">
-                <h2><i class="fas fa-user-circle"></i> <span id="profileWorkerName">Rahul Sharma</span></h2>
-                <span class="role-tag" id="profileWorkerRole">Mason</span>
+                <h2><i class="fas fa-user-circle"></i> <span id="profileWorkerName">Loading...</span></h2>
+                <span class="role-tag" id="profileWorkerRole">Role</span>
                 <button class="profile-close-btn" id="profileCloseBtn"><i class="fas fa-xmark"></i> Close</button>
             </div>
             <div class="profile-summary">
@@ -789,7 +827,7 @@
             </div>
             <div class="month-nav">
                 <button id="prevMonthBtn"><i class="fas fa-chevron-left"></i> Prev</button>
-                <span class="month-label" id="monthLabel">September 2026</span>
+                <span class="month-label" id="monthLabel">Loading...</span>
                 <button id="nextMonthBtn">Next <i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="calendar-grid" id="calendarGrid"></div>
@@ -798,581 +836,845 @@
 
     <script>
         // ============================================================
-        //  FINAL FILE: Workers Management System
-        //  Fully working, dark theme, persistent via localStorage
-        //  Ready to deploy on GitHub Pages + Supabase (or any static host)
+        //  SUPABASE CONFIGURATION
         // ============================================================
+        const SUPABASE_URL = 'https://cvfhkoeyqbtoezdbdaac.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_08z68ANZXn5bOYELHVPSwA_Pi6Za1h4';
 
-        (function() {
-            // ---------- DATA (persisted in localStorage) ----------
-            const STORAGE_KEY = 'jaiswal_workers_data';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            let workers = [];
-            let attendance = {};
-            let todayPaid = {};
-            let historyStore = {};
-            let nextId = 1;
+        // ============================================================
+        //  GLOBAL STATE
+        // ============================================================
+        let workers = [];
+        let attendanceMap = {}; // { workerId: { '2024-01-01': { status, payment, remark } } }
+        let currentProfileWorkerId = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let editingWorkerId = null;
 
-            // ---------- LOAD / SAVE DATA ----------
-            function loadData() {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        workers = data.workers || [];
-                        attendance = data.attendance || {};
-                        todayPaid = data.todayPaid || {};
-                        historyStore = data.historyStore || {};
-                        nextId = data.nextId || 1;
-                        return true;
-                    } catch(e) {
-                        console.warn('Failed to load data, using defaults');
-                    }
+        // ============================================================
+        //  DOM REFS
+        // ============================================================
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginError = document.getElementById('loginError');
+        const userEmailSpan = document.getElementById('userEmail');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        const tbody = document.getElementById('workerTableBody');
+        const manageTbody = document.getElementById('manageTableBody');
+        const totalWorkersEl = document.getElementById('totalWorkers');
+        const presentTodayEl = document.getElementById('presentToday');
+        const paidTodayEl = document.getElementById('paidToday');
+        const totalAdvanceEl = document.getElementById('totalAdvance');
+        const todayDateEl = document.getElementById('todayDate');
+
+        const workerModal = document.getElementById('workerModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalName = document.getElementById('modalName');
+        const modalRole = document.getElementById('modalRole');
+        const modalDailyRate = document.getElementById('modalDailyRate');
+        const modalAdvance = document.getElementById('modalAdvance');
+        const modalSaveBtn = document.getElementById('modalSaveBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const addWorkerBtn = document.getElementById('addWorkerBtn');
+
+        const profileOverlay = document.getElementById('profilePageOverlay');
+        const profileCloseBtn = document.getElementById('profileCloseBtn');
+        const profileWorkerName = document.getElementById('profileWorkerName');
+        const profileWorkerRole = document.getElementById('profileWorkerRole');
+        const profileTotalPaid = document.getElementById('profileTotalPaid');
+        const profileAdvance = document.getElementById('profileAdvance');
+        const profileBalance = document.getElementById('profileBalance');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const monthLabel = document.getElementById('monthLabel');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+        // ============================================================
+        //  UTILITY FUNCTIONS
+        // ============================================================
+        function showLoading() { loadingOverlay.style.display = 'flex'; }
+        function hideLoading() { loadingOverlay.style.display = 'none'; }
+
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // ============================================================
+        //  AUTHENTICATION FUNCTIONS
+        // ============================================================
+        async function loginWithSupabase(email, password) {
+            try {
+                showLoading();
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                if (error) throw error;
+                return { success: true, user: data.user };
+            } catch (error) {
+                console.error('Login error:', error.message);
+                return { success: false, error: error.message };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function logoutFromSupabase() {
+            try {
+                showLoading();
+                await supabase.auth.signOut();
+                return { success: true };
+            } catch (error) {
+                console.error('Logout error:', error.message);
+                return { success: false };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                if (session) {
+                    return { success: true, user: session.user };
                 }
-                return false;
+                return { success: false };
+            } catch (error) {
+                console.error('Auth check error:', error.message);
+                return { success: false };
             }
+        }
 
-            function saveData() {
-                const data = {
-                    workers,
-                    attendance,
-                    todayPaid,
-                    historyStore,
-                    nextId
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        // ============================================================
+        //  DATA OPERATIONS
+        // ============================================================
+        async function loadWorkersFromSupabase() {
+            try {
+                showLoading();
+                const { data, error } = await supabase
+                    .from('workers')
+                    .select('*')
+                    .order('id');
+                if (error) throw error;
+                workers = data || [];
+                return workers;
+            } catch (error) {
+                console.error('Error loading workers:', error.message);
+                alert('Failed to load workers: ' + error.message);
+                return [];
+            } finally {
+                hideLoading();
             }
+        }
 
-            // ---------- INITIALIZE DEFAULTS ----------
-            function initDefaultData() {
-                workers = [
-                    { id: 1, name: 'Rahul Sharma', role: 'Mason', totalPaid: 12400, advance: 500, dailyRate: 600 },
-                    { id: 2, name: 'Amit Kumar', role: 'Carpenter', totalPaid: 8800, advance: 200, dailyRate: 700 },
-                    { id: 3, name: 'Suresh Patel', role: 'Helper', totalPaid: 5600, advance: 800, dailyRate: 450 },
-                    { id: 4, name: 'Vikram Singh', role: 'Electrician', totalPaid: 15200, advance: 300, dailyRate: 750 },
-                    { id: 5, name: 'Ravi Gupta', role: 'Plumber', totalPaid: 9700, advance: 0, dailyRate: 650 },
-                    { id: 6, name: 'Manoj Yadav', role: 'Supervisor', totalPaid: 21000, advance: 1000, dailyRate: 900 }
-                ];
-                nextId = 7;
+        async function loadAttendanceForWorker(workerId) {
+            try {
+                const { data, error } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .eq('worker_id', workerId);
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error('Error loading attendance:', error.message);
+                return [];
+            }
+        }
 
-                // generate demo history for last 30 days
-                const today = new Date();
-                const startDate = new Date(today);
-                startDate.setDate(today.getDate() - 25);
+        async function loadAllAttendance() {
+            try {
+                const { data, error } = await supabase
+                    .from('attendance')
+                    .select('*');
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error('Error loading all attendance:', error.message);
+                return [];
+            }
+        }
 
-                historyStore = {};
-                workers.forEach(w => {
-                    const map = {};
-                    for (let i = 0; i < 40; i++) {
-                        const d = new Date(startDate);
-                        d.setDate(startDate.getDate() + i);
-                        const dateStr = d.toISOString().split('T')[0];
-                        const r = Math.random();
-                        let status = 'present';
-                        if (r < 0.15) status = 'absent';
-                        else if (r < 0.25) status = 'half';
-                        const payment = status === 'absent' ? 0 : (status === 'half' ? Math.round(w.dailyRate * 0.5) : w.dailyRate);
-                        const remark = status === 'present' ? 'full day' : (status === 'half' ? 'half day' : 'off');
-                        map[dateStr] = { status, payment, remark };
+        async function saveWorkerToSupabase(worker) {
+            try {
+                showLoading();
+                let result;
+                if (worker.id) {
+                    // Update
+                    const { data, error } = await supabase
+                        .from('workers')
+                        .update({
+                            name: worker.name,
+                            role: worker.role,
+                            daily_rate: worker.daily_rate,
+                            advance: worker.advance,
+                            total_paid: worker.total_paid || 0
+                        })
+                        .eq('id', worker.id)
+                        .select();
+                    if (error) throw error;
+                    result = data[0];
+                } else {
+                    // Insert
+                    const { data, error } = await supabase
+                        .from('workers')
+                        .insert({
+                            name: worker.name,
+                            role: worker.role,
+                            daily_rate: worker.daily_rate,
+                            advance: worker.advance || 0,
+                            total_paid: worker.total_paid || 0
+                        })
+                        .select();
+                    if (error) throw error;
+                    result = data[0];
+                }
+                return result;
+            } catch (error) {
+                console.error('Error saving worker:', error.message);
+                alert('Failed to save worker: ' + error.message);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function deleteWorkerFromSupabase(id) {
+            try {
+                showLoading();
+                // First delete all attendance records for this worker
+                const { error: attError } = await supabase
+                    .from('attendance')
+                    .delete()
+                    .eq('worker_id', id);
+                if (attError) throw attError;
+
+                // Then delete the worker
+                const { error } = await supabase
+                    .from('workers')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
+                return { success: true };
+            } catch (error) {
+                console.error('Error deleting worker:', error.message);
+                alert('Failed to delete worker: ' + error.message);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function saveAttendanceToSupabase(attendanceData) {
+            try {
+                showLoading();
+                const { data, error } = await supabase
+                    .from('attendance')
+                    .upsert(attendanceData, {
+                        onConflict: 'worker_id,date',
+                        ignoreDuplicates: false
+                    })
+                    .select();
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error saving attendance:', error.message);
+                alert('Failed to save attendance: ' + error.message);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ============================================================
+        //  RENDER FUNCTIONS
+        // ============================================================
+        function renderManageTable() {
+            let html = '';
+            workers.forEach(w => {
+                html += `
+                    <tr>
+                        <td><span class="worker-name"><i class="fas fa-user"></i> ${w.name}</span></td>
+                        <td><span class="role-badge">${w.role}</span></td>
+                        <td>₹ ${w.daily_rate}</td>
+                        <td>₹ ${w.advance || 0}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="edit-btn" data-id="${w.id}"><i class="fas fa-pen"></i> Edit</button>
+                                <button class="delete-btn" data-id="${w.id}"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            manageTbody.innerHTML = html;
+
+            manageTbody.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    openEditModal(id);
+                });
+            });
+            manageTbody.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    if (confirm('Delete this worker? This will also remove their history.')) {
+                        deleteWorker(id);
                     }
-                    historyStore[w.id] = map;
                 });
+            });
+        }
 
-                // ensure today
-                const todayStr = today.toISOString().split('T')[0];
-                workers.forEach(w => {
-                    if (!historyStore[w.id]) historyStore[w.id] = {};
-                    if (!historyStore[w.id][todayStr]) {
-                        historyStore[w.id][todayStr] = { status: 'present', payment: w.dailyRate, remark: '' };
+        function renderDailyTable() {
+            const total = workers.length;
+            const todayStr = getTodayStr();
+            let presentCount = 0;
+            let totalPaidToday = 0;
+            let totalAdvance = 0;
+
+            workers.forEach(w => {
+                totalAdvance += w.advance || 0;
+                const att = attendanceMap[w.id]?.[todayStr];
+                if (att && att.status !== 'absent') {
+                    presentCount++;
+                    totalPaidToday += att.payment || 0;
+                }
+            });
+
+            totalWorkersEl.textContent = total;
+            presentTodayEl.textContent = presentCount;
+            paidTodayEl.textContent = `₹ ${totalPaidToday.toLocaleString()}`;
+            totalAdvanceEl.textContent = `₹ ${totalAdvance.toLocaleString()}`;
+
+            const now = new Date();
+            todayDateEl.textContent = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            let html = '';
+            workers.forEach(w => {
+                const att = attendanceMap[w.id]?.[todayStr] || { status: 'present', payment: 0 };
+                const isPresent = att.status !== 'absent';
+                const paid = att.payment || 0;
+                const balance = (w.total_paid || 0) - (w.advance || 0) + (isPresent ? paid : 0);
+                const balanceDisplay = balance >= 0 ? `₹ ${balance}` : `-₹ ${Math.abs(balance)}`;
+
+                html += `
+                    <tr>
+                        <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${w.name}</span></td>
+                        <td>
+                            <div class="attendance-toggle">
+                                <button data-id="${w.id}" data-val="present" class="${att.status === 'present' ? 'active' : ''}">P</button>
+                                <button data-id="${w.id}" data-val="absent" class="${att.status === 'absent' ? 'active' : ''}">A</button>
+                                <button data-id="${w.id}" data-val="half" class="${att.status === 'half' ? 'active' : ''}">½</button>
+                            </div>
+                        </td>
+                        <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" /></td>
+                        <td><span style="font-weight:600;">${balanceDisplay}</span></td>
+                        <td><button class="profile-btn" data-id="${w.id}"><i class="fas fa-address-card"></i> View</button></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+
+            // Attendance toggles
+            tbody.querySelectorAll('.attendance-toggle button').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    const id = parseInt(this.dataset.id);
+                    const status = this.dataset.val;
+                    const todayStr = getTodayStr();
+
+                    if (!attendanceMap[id]) attendanceMap[id] = {};
+                    if (!attendanceMap[id][todayStr]) {
+                        attendanceMap[id][todayStr] = { status: 'present', payment: 0, remark: '' };
                     }
-                    const entry = historyStore[w.id][todayStr];
-                    attendance[w.id] = (entry.status === 'present' || entry.status === 'half');
-                    todayPaid[w.id] = entry.payment || 0;
+                    attendanceMap[id][todayStr].status = status;
+                    if (status === 'absent') {
+                        attendanceMap[id][todayStr].payment = 0;
+                    } else if (status === 'half') {
+                        const w = workers.find(ww => ww.id === id);
+                        attendanceMap[id][todayStr].payment = Math.round((w?.daily_rate || 0) * 0.5);
+                    } else {
+                        const w = workers.find(ww => ww.id === id);
+                        attendanceMap[id][todayStr].payment = w?.daily_rate || 0;
+                    }
+
+                    await saveAttendanceToSupabase([{
+                        worker_id: id,
+                        date: todayStr,
+                        status: attendanceMap[id][todayStr].status,
+                        payment: attendanceMap[id][todayStr].payment,
+                        remark: attendanceMap[id][todayStr].remark || ''
+                    }]);
+
+                    renderDailyTable();
+                    renderManageTable();
                 });
+            });
 
-                saveData();
-            }
+            // Payment inputs
+            tbody.querySelectorAll('.paid-input').forEach(inp => {
+                inp.addEventListener('change', async function() {
+                    const id = parseInt(this.dataset.id);
+                    let val = parseFloat(this.value);
+                    if (isNaN(val) || val < 0) val = 0;
+                    const todayStr = getTodayStr();
 
-            // ---------- DOM REFS ----------
-            const loginScreen = document.getElementById('loginScreen');
-            const dashboardScreen = document.getElementById('dashboardScreen');
-            const loginBtn = document.getElementById('loginBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const usernameInput = document.getElementById('usernameInput');
-            const passwordInput = document.getElementById('passwordInput');
-            const loginError = document.getElementById('loginError');
+                    if (!attendanceMap[id]) attendanceMap[id] = {};
+                    if (!attendanceMap[id][todayStr]) {
+                        attendanceMap[id][todayStr] = { status: 'present', payment: val, remark: '' };
+                    }
+                    attendanceMap[id][todayStr].payment = val;
 
-            const tbody = document.getElementById('workerTableBody');
-            const manageTbody = document.getElementById('manageTableBody');
-            const totalWorkersEl = document.getElementById('totalWorkers');
-            const presentTodayEl = document.getElementById('presentToday');
-            const paidTodayEl = document.getElementById('paidToday');
-            const totalAdvanceEl = document.getElementById('totalAdvance');
-            const todayDateEl = document.getElementById('todayDate');
+                    await saveAttendanceToSupabase([{
+                        worker_id: id,
+                        date: todayStr,
+                        status: attendanceMap[id][todayStr].status || 'present',
+                        payment: val,
+                        remark: attendanceMap[id][todayStr].remark || ''
+                    }]);
 
-            const workerModal = document.getElementById('workerModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalName = document.getElementById('modalName');
-            const modalRole = document.getElementById('modalRole');
-            const modalDailyRate = document.getElementById('modalDailyRate');
-            const modalAdvance = document.getElementById('modalAdvance');
-            const modalSaveBtn = document.getElementById('modalSaveBtn');
-            const modalCancelBtn = document.getElementById('modalCancelBtn');
-            const addWorkerBtn = document.getElementById('addWorkerBtn');
-
-            const profileOverlay = document.getElementById('profilePageOverlay');
-            const profileCloseBtn = document.getElementById('profileCloseBtn');
-            const profileWorkerName = document.getElementById('profileWorkerName');
-            const profileWorkerRole = document.getElementById('profileWorkerRole');
-            const profileTotalPaid = document.getElementById('profileTotalPaid');
-            const profileAdvance = document.getElementById('profileAdvance');
-            const profileBalance = document.getElementById('profileBalance');
-            const calendarGrid = document.getElementById('calendarGrid');
-            const monthLabel = document.getElementById('monthLabel');
-            const prevMonthBtn = document.getElementById('prevMonthBtn');
-            const nextMonthBtn = document.getElementById('nextMonthBtn');
-
-            let editingWorkerId = null;
-            let currentProfileWorkerId = null;
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
-
-            // ---------- RENDER FUNCTIONS ----------
-            function renderManageTable() {
-                let html = '';
-                workers.forEach(w => {
-                    html += `
-                        <tr>
-                            <td><span class="worker-name"><i class="fas fa-user"></i> ${w.name}</span></td>
-                            <td><span class="role-badge">${w.role}</span></td>
-                            <td>₹ ${w.dailyRate}</td>
-                            <td>₹ ${w.advance}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="edit-btn" data-id="${w.id}"><i class="fas fa-pen"></i> Edit</button>
-                                    <button class="delete-btn" data-id="${w.id}"><i class="fas fa-trash"></i> Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    renderDailyTable();
+                    renderManageTable();
                 });
-                manageTbody.innerHTML = html;
+            });
 
-                manageTbody.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = parseInt(this.dataset.id);
-                        openEditModal(id);
-                    });
+            // Profile buttons
+            tbody.querySelectorAll('.profile-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    currentMonth = new Date().getMonth();
+                    currentYear = new Date().getFullYear();
+                    openProfilePage(id);
                 });
-                manageTbody.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = parseInt(this.dataset.id);
-                        if (confirm('Delete this worker? This will also remove their history.')) {
-                            deleteWorker(id);
-                        }
-                    });
-                });
-            }
+            });
+        }
 
-            function renderDailyTable() {
-                const total = workers.length;
-                const present = workers.filter(w => attendance[w.id] === true).length;
-                let totalPaidToday = 0;
-                workers.forEach(w => { if (attendance[w.id]) totalPaidToday += todayPaid[w.id] || 0; });
-                const totalAdv = workers.reduce((sum, w) => sum + (w.advance || 0), 0);
+        function fullRender() {
+            renderManageTable();
+            renderDailyTable();
+        }
 
-                totalWorkersEl.textContent = total;
-                presentTodayEl.textContent = present;
-                paidTodayEl.textContent = `₹ ${totalPaidToday.toLocaleString()}`;
-                totalAdvanceEl.textContent = `₹ ${totalAdv.toLocaleString()}`;
-
-                const now = new Date();
-                todayDateEl.textContent = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-
-                let html = '';
-                workers.forEach(w => {
-                    const isPresent = attendance[w.id] === true;
-                    const paid = todayPaid[w.id] || 0;
-                    const balance = (w.totalPaid || 0) - (w.advance || 0) + (isPresent ? paid : 0);
-                    const balanceDisplay = balance >= 0 ? `₹ ${balance}` : `-₹ ${Math.abs(balance)}`;
-                    html += `
-                        <tr>
-                            <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${w.name}</span></td>
-                            <td>
-                                <div class="attendance-toggle">
-                                    <button data-id="${w.id}" data-val="true" class="${isPresent ? 'active' : ''}">P</button>
-                                    <button data-id="${w.id}" data-val="false" class="${!isPresent ? 'active' : ''}">A</button>
-                                </div>
-                            </td>
-                            <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" /></td>
-                            <td><span style="font-weight:600;">${balanceDisplay}</span></td>
-                            <td><button class="profile-btn" data-id="${w.id}"><i class="fas fa-address-card"></i> View</button></td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-
-                tbody.querySelectorAll('.attendance-toggle button').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const id = parseInt(this.dataset.id);
-                        const val = this.dataset.val === 'true';
-                        attendance[id] = val;
-                        const todayStr = new Date().toISOString().split('T')[0];
-                        if (!historyStore[id]) historyStore[id] = {};
-                        if (!historyStore[id][todayStr]) {
-                            historyStore[id][todayStr] = { status: 'present', payment: 0, remark: '' };
-                        }
-                        historyStore[id][todayStr].status = val ? 'present' : 'absent';
-                        if (!val) historyStore[id][todayStr].payment = 0;
-                        else if (historyStore[id][todayStr].payment === 0) {
-                            const w = workers.find(w => w.id === id);
-                            historyStore[id][todayStr].payment = w?.dailyRate || 0;
-                        }
-                        todayPaid[id] = historyStore[id][todayStr].payment;
-                        saveData();
-                        renderDailyTable();
-                        renderManageTable();
-                    });
-                });
-
-                tbody.querySelectorAll('.paid-input').forEach(inp => {
-                    inp.addEventListener('change', function() {
-                        const id = parseInt(this.dataset.id);
-                        let val = parseFloat(this.value);
-                        if (isNaN(val) || val < 0) val = 0;
-                        todayPaid[id] = val;
-                        const todayStr = new Date().toISOString().split('T')[0];
-                        if (!historyStore[id]) historyStore[id] = {};
-                        if (!historyStore[id][todayStr]) {
-                            historyStore[id][todayStr] = { status: 'present', payment: val, remark: '' };
-                        } else {
-                            historyStore[id][todayStr].payment = val;
-                        }
-                        saveData();
-                        renderDailyTable();
-                        renderManageTable();
-                    });
-                });
-
-                tbody.querySelectorAll('.profile-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = parseInt(this.dataset.id);
-                        currentMonth = new Date().getMonth();
-                        currentYear = new Date().getFullYear();
-                        openProfilePage(id);
-                    });
-                });
-            }
-
-            function fullRender() {
-                renderManageTable();
-                renderDailyTable();
-            }
-
-            // ---------- CRUD ----------
-            function deleteWorker(id) {
-                const idx = workers.findIndex(w => w.id === id);
-                if (idx === -1) return;
-                workers.splice(idx, 1);
-                delete historyStore[id];
-                delete attendance[id];
-                delete todayPaid[id];
-                saveData();
+        // ============================================================
+        //  CRUD OPERATIONS
+        // ============================================================
+        async function deleteWorker(id) {
+            try {
+                await deleteWorkerFromSupabase(id);
+                workers = workers.filter(w => w.id !== id);
+                delete attendanceMap[id];
                 fullRender();
+            } catch (error) {
+                // Error already handled in deleteWorkerFromSupabase
+            }
+        }
+
+        function openEditModal(id) {
+            const w = workers.find(w => w.id === id);
+            if (!w) return;
+            editingWorkerId = id;
+            modalTitle.innerHTML = '<i class="fas fa-user-pen"></i> Edit Worker';
+            modalName.value = w.name;
+            modalRole.value = w.role;
+            modalDailyRate.value = w.daily_rate;
+            modalAdvance.value = w.advance || 0;
+            workerModal.style.display = 'flex';
+        }
+
+        function openAddModal() {
+            editingWorkerId = null;
+            modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Add Worker';
+            modalName.value = '';
+            modalRole.value = '';
+            modalDailyRate.value = '';
+            modalAdvance.value = '0';
+            workerModal.style.display = 'flex';
+        }
+
+        async function saveWorker() {
+            const name = modalName.value.trim();
+            const role = modalRole.value.trim();
+            const daily_rate = parseFloat(modalDailyRate.value);
+            const advance = parseFloat(modalAdvance.value) || 0;
+
+            if (!name || !role || isNaN(daily_rate) || daily_rate <= 0) {
+                alert('Please fill all fields correctly.');
+                return;
             }
 
-            function openEditModal(id) {
-                const w = workers.find(w => w.id === id);
-                if (!w) return;
-                editingWorkerId = id;
-                modalTitle.innerHTML = '<i class="fas fa-user-pen"></i> Edit Worker';
-                modalName.value = w.name;
-                modalRole.value = w.role;
-                modalDailyRate.value = w.dailyRate;
-                modalAdvance.value = w.advance;
-                workerModal.style.display = 'flex';
-            }
-
-            function openAddModal() {
-                editingWorkerId = null;
-                modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Add Worker';
-                modalName.value = '';
-                modalRole.value = '';
-                modalDailyRate.value = '';
-                modalAdvance.value = '0';
-                workerModal.style.display = 'flex';
-            }
-
-            function saveWorker() {
-                const name = modalName.value.trim();
-                const role = modalRole.value.trim();
-                const dailyRate = parseFloat(modalDailyRate.value);
-                const advance = parseFloat(modalAdvance.value) || 0;
-
-                if (!name || !role || isNaN(dailyRate) || dailyRate <= 0) {
-                    alert('Please fill all fields correctly.');
-                    return;
+            try {
+                const workerData = {
+                    name,
+                    role,
+                    daily_rate,
+                    advance,
+                    total_paid: 0
+                };
+                if (editingWorkerId !== null) {
+                    workerData.id = editingWorkerId;
+                    const existing = workers.find(w => w.id === editingWorkerId);
+                    if (existing) workerData.total_paid = existing.total_paid || 0;
                 }
+
+                const saved = await saveWorkerToSupabase(workerData);
 
                 if (editingWorkerId !== null) {
-                    const w = workers.find(w => w.id === editingWorkerId);
-                    if (w) {
-                        w.name = name;
-                        w.role = role;
-                        w.dailyRate = dailyRate;
-                        w.advance = advance;
-                    }
+                    const idx = workers.findIndex(w => w.id === editingWorkerId);
+                    if (idx !== -1) workers[idx] = saved;
                 } else {
-                    const newWorker = {
-                        id: nextId++,
-                        name,
-                        role,
-                        totalPaid: 0,
-                        advance,
-                        dailyRate
+                    workers.push(saved);
+                    attendanceMap[saved.id] = {};
+                    const todayStr = getTodayStr();
+                    attendanceMap[saved.id][todayStr] = {
+                        status: 'present',
+                        payment: saved.daily_rate,
+                        remark: ''
                     };
-                    workers.push(newWorker);
-                    historyStore[newWorker.id] = {};
-                    attendance[newWorker.id] = true;
-                    todayPaid[newWorker.id] = dailyRate;
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    historyStore[newWorker.id][todayStr] = { status: 'present', payment: dailyRate, remark: '' };
+                    await saveAttendanceToSupabase([{
+                        worker_id: saved.id,
+                        date: todayStr,
+                        status: 'present',
+                        payment: saved.daily_rate,
+                        remark: ''
+                    }]);
                 }
 
                 workerModal.style.display = 'none';
-                saveData();
                 fullRender();
+            } catch (error) {
+                // Error already handled in saveWorkerToSupabase
+            }
+        }
+
+        // ============================================================
+        //  PROFILE PAGE
+        // ============================================================
+        async function openProfilePage(workerId) {
+            const w = workers.find(w => w.id === workerId);
+            if (!w) return;
+            currentProfileWorkerId = workerId;
+            profileWorkerName.textContent = w.name;
+            profileWorkerRole.textContent = w.role;
+
+            // Load attendance for this worker
+            const attData = await loadAttendanceForWorker(workerId);
+            if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+            attData.forEach(att => {
+                attendanceMap[workerId][att.date] = {
+                    status: att.status,
+                    payment: att.payment || 0,
+                    remark: att.remark || ''
+                };
+            });
+
+            const totalPaid = w.total_paid || 0;
+            const adv = w.advance || 0;
+            const todayStr = getTodayStr();
+            const todayAtt = attendanceMap[workerId]?.[todayStr];
+            const todayPaid = (todayAtt && todayAtt.status !== 'absent') ? (todayAtt.payment || 0) : 0;
+            const isPresent = todayAtt && todayAtt.status !== 'absent';
+            const balance = totalPaid - adv + (isPresent ? todayPaid : 0);
+
+            profileTotalPaid.textContent = `₹ ${totalPaid.toLocaleString()}`;
+            profileAdvance.textContent = `₹ ${adv.toLocaleString()}`;
+            profileBalance.textContent = `₹ ${balance.toLocaleString()}`;
+
+            renderCalendar(workerId);
+            profileOverlay.style.display = 'flex';
+        }
+
+        function renderCalendar(workerId) {
+            const w = workers.find(w => w.id === workerId);
+            if (!w) return;
+
+            const dateObj = new Date(currentYear, currentMonth, 1);
+            monthLabel.textContent = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            const history = attendanceMap[workerId] || {};
+
+            let gridHtml = '';
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                gridHtml += `<div class="day-header">${day}</div>`;
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                gridHtml += `<div class="empty-day"></div>`;
             }
 
-            // ---------- PROFILE PAGE ----------
-            function openProfilePage(workerId) {
-                const w = workers.find(w => w.id === workerId);
-                if (!w) return;
-                currentProfileWorkerId = workerId;
-                profileWorkerName.textContent = w.name;
-                profileWorkerRole.textContent = w.role;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const entry = history[dateStr] || { status: 'present', payment: 0, remark: '' };
+                const status = entry.status || 'present';
+                const payment = entry.payment || 0;
+                const remark = entry.remark || '';
 
-                const totalPaid = w.totalPaid || 0;
-                const adv = w.advance || 0;
-                const todayPaidVal = todayPaid[workerId] || 0;
-                const isPresent = attendance[workerId] === true;
-                const balance = totalPaid - adv + (isPresent ? todayPaidVal : 0);
-                profileTotalPaid.textContent = `₹ ${totalPaid.toLocaleString()}`;
-                profileAdvance.textContent = `₹ ${adv.toLocaleString()}`;
-                profileBalance.textContent = `₹ ${balance.toLocaleString()}`;
-
-                renderCalendar(workerId);
-                profileOverlay.style.display = 'flex';
-            }
-
-            function renderCalendar(workerId) {
-                const w = workers.find(w => w.id === workerId);
-                if (!w) return;
-
-                const dateObj = new Date(currentYear, currentMonth, 1);
-                monthLabel.textContent = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-                const history = historyStore[workerId] || {};
-
-                let gridHtml = '';
-                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                weekdays.forEach(day => {
-                    gridHtml += `<div class="day-header">${day}</div>`;
-                });
-
-                for (let i = 0; i < firstDay; i++) {
-                    gridHtml += `<div class="empty-day"></div>`;
-                }
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const entry = history[dateStr] || { status: 'present', payment: 0, remark: '' };
-                    const status = entry.status || 'present';
-                    const payment = entry.payment || 0;
-                    const remark = entry.remark || '';
-
-                    gridHtml += `
-                        <div class="day-block" data-date="${dateStr}">
-                            <div class="day-label">
-                                <span>${day}</span>
-                                <span class="status-badge">${status}</span>
-                            </div>
-                            <div class="day-actions">
-                                <button class="${status === 'present' ? 'active-status' : ''}" data-status="present">P</button>
-                                <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent">A</button>
-                                <button class="${status === 'half' ? 'active-status' : ''}" data-status="half">½</button>
-                            </div>
-                            <div class="day-payment">
-                                <i class="fas fa-coins" style="color:#e8b86d; font-size:0.6rem;"></i>
-                                <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" />
-                            </div>
-                            <div class="day-remark">
-                                <input type="text" class="day-remark-input" value="${remark}" placeholder="remark" />
-                            </div>
+                gridHtml += `
+                    <div class="day-block" data-date="${dateStr}">
+                        <div class="day-label">
+                            <span>${day}</span>
+                            <span class="status-badge">${status}</span>
                         </div>
-                    `;
-                }
+                        <div class="day-actions">
+                            <button class="${status === 'present' ? 'active-status' : ''}" data-status="present">P</button>
+                            <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent">A</button>
+                            <button class="${status === 'half' ? 'active-status' : ''}" data-status="half">½</button>
+                        </div>
+                        <div class="day-payment">
+                            <i class="fas fa-coins" style="color:#e8b86d; font-size:0.6rem;"></i>
+                            <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" />
+                        </div>
+                        <div class="day-remark">
+                            <input type="text" class="day-remark-input" value="${remark}" placeholder="remark" />
+                        </div>
+                    </div>
+                `;
+            }
 
-                calendarGrid.innerHTML = gridHtml;
+            calendarGrid.innerHTML = gridHtml;
 
-                document.querySelectorAll('.day-block').forEach(block => {
-                    const date = block.dataset.date;
-                    if (!date) return;
+            // Attach events
+            document.querySelectorAll('.day-block').forEach(block => {
+                const date = block.dataset.date;
+                if (!date) return;
 
-                    block.querySelectorAll('.day-actions button').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const newStatus = this.dataset.status;
-                            if (!historyStore[workerId]) historyStore[workerId] = {};
-                            if (!historyStore[workerId][date]) {
-                                historyStore[workerId][date] = { status: newStatus, payment: 0, remark: '' };
-                            }
-                            historyStore[workerId][date].status = newStatus;
-                            const ww = workers.find(w => w.id === workerId);
-                            if (newStatus === 'absent') historyStore[workerId][date].payment = 0;
-                            else if (newStatus === 'half') historyStore[workerId][date].payment = Math.round((ww?.dailyRate || 0) * 0.5);
-                            else historyStore[workerId][date].payment = ww?.dailyRate || 0;
+                block.querySelectorAll('.day-actions button').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const newStatus = this.dataset.status;
+                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+                        if (!attendanceMap[workerId][date]) {
+                            attendanceMap[workerId][date] = { status: 'present', payment: 0, remark: '' };
+                        }
+                        attendanceMap[workerId][date].status = newStatus;
+                        const ww = workers.find(w => w.id === workerId);
+                        if (newStatus === 'absent') attendanceMap[workerId][date].payment = 0;
+                        else if (newStatus === 'half') attendanceMap[workerId][date].payment = Math.round((ww?.daily_rate || 0) * 0.5);
+                        else attendanceMap[workerId][date].payment = ww?.daily_rate || 0;
 
-                            const todayStr = new Date().toISOString().split('T')[0];
-                            if (date === todayStr) {
-                                attendance[workerId] = (newStatus === 'present' || newStatus === 'half');
-                                todayPaid[workerId] = historyStore[workerId][date].payment || 0;
-                                saveData();
-                                fullRender();
-                            }
-                            saveData();
-                            renderCalendar(workerId);
-                        });
+                        await saveAttendanceToSupabase([{
+                            worker_id: workerId,
+                            date: date,
+                            status: newStatus,
+                            payment: attendanceMap[workerId][date].payment || 0,
+                            remark: attendanceMap[workerId][date].remark || ''
+                        }]);
+
+                        const todayStr = getTodayStr();
+                        if (date === todayStr) {
+                            fullRender();
+                        }
+                        renderCalendar(workerId);
                     });
-
-                    const paymentInput = block.querySelector('.day-payment-input');
-                    if (paymentInput) {
-                        paymentInput.addEventListener('change', function() {
-                            let val = parseFloat(this.value);
-                            if (isNaN(val) || val < 0) val = 0;
-                            if (!historyStore[workerId]) historyStore[workerId] = {};
-                            if (!historyStore[workerId][date]) {
-                                historyStore[workerId][date] = { status: 'present', payment: val, remark: '' };
-                            } else {
-                                historyStore[workerId][date].payment = val;
-                            }
-                            const todayStr = new Date().toISOString().split('T')[0];
-                            if (date === todayStr) {
-                                todayPaid[workerId] = val;
-                                saveData();
-                                fullRender();
-                            }
-                            saveData();
-                            renderCalendar(workerId);
-                        });
-                    }
-
-                    const remarkInput = block.querySelector('.day-remark-input');
-                    if (remarkInput) {
-                        remarkInput.addEventListener('change', function() {
-                            const remark = this.value;
-                            if (!historyStore[workerId]) historyStore[workerId] = {};
-                            if (!historyStore[workerId][date]) {
-                                historyStore[workerId][date] = { status: 'present', payment: 0, remark: remark };
-                            } else {
-                                historyStore[workerId][date].remark = remark;
-                            }
-                            saveData();
-                        });
-                    }
                 });
-            }
 
-            function closeProfilePage() {
-                profileOverlay.style.display = 'none';
-                currentProfileWorkerId = null;
-            }
+                const paymentInput = block.querySelector('.day-payment-input');
+                if (paymentInput) {
+                    paymentInput.addEventListener('change', async function() {
+                        let val = parseFloat(this.value);
+                        if (isNaN(val) || val < 0) val = 0;
+                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+                        if (!attendanceMap[workerId][date]) {
+                            attendanceMap[workerId][date] = { status: 'present', payment: val, remark: '' };
+                        } else {
+                            attendanceMap[workerId][date].payment = val;
+                        }
 
-            function changeMonth(delta) {
-                currentMonth += delta;
-                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-                if (currentProfileWorkerId !== null) {
-                    renderCalendar(currentProfileWorkerId);
+                        await saveAttendanceToSupabase([{
+                            worker_id: workerId,
+                            date: date,
+                            status: attendanceMap[workerId][date].status || 'present',
+                            payment: val,
+                            remark: attendanceMap[workerId][date].remark || ''
+                        }]);
+
+                        const todayStr = getTodayStr();
+                        if (date === todayStr) {
+                            fullRender();
+                        }
+                        renderCalendar(workerId);
+                    });
                 }
-            }
 
-            // ---------- LOGIN / LOGOUT ----------
-            function handleLogin() {
-                const user = usernameInput.value.trim();
-                const pass = passwordInput.value.trim();
-                if (user === 'admin' && pass === 'jaiswal123') {
-                    loginError.style.display = 'none';
-                    loginScreen.style.display = 'none';
-                    dashboardScreen.style.display = 'block';
-                    fullRender();
-                } else {
-                    loginError.style.display = 'flex';
+                const remarkInput = block.querySelector('.day-remark-input');
+                if (remarkInput) {
+                    remarkInput.addEventListener('change', async function() {
+                        const remark = this.value;
+                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+                        if (!attendanceMap[workerId][date]) {
+                            attendanceMap[workerId][date] = { status: 'present', payment: 0, remark: remark };
+                        } else {
+                            attendanceMap[workerId][date].remark = remark;
+                        }
+
+                        await saveAttendanceToSupabase([{
+                            worker_id: workerId,
+                            date: date,
+                            status: attendanceMap[workerId][date].status || 'present',
+                            payment: attendanceMap[workerId][date].payment || 0,
+                            remark: remark
+                        }]);
+                    });
                 }
+            });
+        }
+
+        function closeProfilePage() {
+            profileOverlay.style.display = 'none';
+            currentProfileWorkerId = null;
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentProfileWorkerId !== null) {
+                renderCalendar(currentProfileWorkerId);
+            }
+        }
+
+        // ============================================================
+        //  AUTH HANDLERS
+        // ============================================================
+        async function handleLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                loginError.textContent = 'Please enter email and password';
+                loginError.style.display = 'flex';
+                return;
             }
 
-            function handleLogout() {
-                dashboardScreen.style.display = 'none';
-                loginScreen.style.display = 'flex';
+            const result = await loginWithSupabase(email, password);
+
+            if (result.success) {
                 loginError.style.display = 'none';
-                usernameInput.value = 'admin';
-                passwordInput.value = 'jaiswal123';
+                loginScreen.style.display = 'none';
+                dashboardScreen.style.display = 'block';
+                userEmailSpan.textContent = result.user.email;
+                await loadData();
+                fullRender();
+            } else {
+                loginError.textContent = 'Login failed: ' + result.error;
+                loginError.style.display = 'flex';
             }
+        }
 
-            // ---------- INIT ----------
-            function init() {
-                // Load data or init defaults
-                const dataLoaded = loadData();
-                if (!dataLoaded || workers.length === 0) {
-                    initDefaultData();
-                }
+        async function handleLogout() {
+            await logoutFromSupabase();
+            dashboardScreen.style.display = 'none';
+            loginScreen.style.display = 'flex';
+            loginError.style.display = 'none';
+            emailInput.value = '';
+            passwordInput.value = '';
+            workers = [];
+            attendanceMap = {};
+            fullRender();
+        }
+
+        // ============================================================
+        //  LOAD DATA
+        // ============================================================
+        async function loadData() {
+            try {
+                showLoading();
+                workers = await loadWorkersFromSupabase();
+
+                // Load attendance for all workers
+                const allAtt = await loadAllAttendance();
+                attendanceMap = {};
+                allAtt.forEach(att => {
+                    if (!attendanceMap[att.worker_id]) attendanceMap[att.worker_id] = {};
+                    attendanceMap[att.worker_id][att.date] = {
+                        status: att.status,
+                        payment: att.payment || 0,
+                        remark: att.remark || ''
+                    };
+                });
 
                 // Ensure today exists for all workers
-                const todayStr = new Date().toISOString().split('T')[0];
-                workers.forEach(w => {
-                    if (!historyStore[w.id]) historyStore[w.id] = {};
-                    if (!historyStore[w.id][todayStr]) {
-                        historyStore[w.id][todayStr] = { status: 'present', payment: w.dailyRate, remark: '' };
+                const todayStr = getTodayStr();
+                for (const w of workers) {
+                    if (!attendanceMap[w.id]) attendanceMap[w.id] = {};
+                    if (!attendanceMap[w.id][todayStr]) {
+                        attendanceMap[w.id][todayStr] = {
+                            status: 'present',
+                            payment: w.daily_rate,
+                            remark: ''
+                        };
+                        await saveAttendanceToSupabase([{
+                            worker_id: w.id,
+                            date: todayStr,
+                            status: 'present',
+                            payment: w.daily_rate,
+                            remark: ''
+                        }]);
                     }
-                    const entry = historyStore[w.id][todayStr];
-                    attendance[w.id] = (entry.status === 'present' || entry.status === 'half');
-                    todayPaid[w.id] = entry.payment || 0;
-                });
-                saveData();
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Failed to load data. Please refresh the page.');
+            } finally {
+                hideLoading();
+            }
+        }
 
-                // Show login screen
+        // ============================================================
+        //  INIT
+        // ============================================================
+        async function init() {
+            // Check if user is already logged in
+            const auth = await checkAuth();
+            if (auth.success) {
+                loginScreen.style.display = 'none';
+                dashboardScreen.style.display = 'block';
+                userEmailSpan.textContent = auth.user.email;
+                await loadData();
+                fullRender();
+            } else {
                 loginScreen.style.display = 'flex';
                 dashboardScreen.style.display = 'none';
                 loginError.style.display = 'none';
-                usernameInput.value = 'admin';
-                passwordInput.value = 'jaiswal123';
-
-                // Event listeners
-                loginBtn.addEventListener('click', handleLogin);
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && loginScreen.style.display !== 'none') handleLogin();
-                });
-                logoutBtn.addEventListener('click', handleLogout);
-
-                addWorkerBtn.addEventListener('click', openAddModal);
-                modalCancelBtn.addEventListener('click', () => { workerModal.style.display = 'none'; });
-                modalSaveBtn.addEventListener('click', saveWorker);
-                workerModal.addEventListener('click', (e) => { if (e.target === workerModal) workerModal.style.display = 'none'; });
-
-                profileCloseBtn.addEventListener('click', closeProfilePage);
-                profileOverlay.addEventListener('click', (e) => { if (e.target === profileOverlay) closeProfilePage(); });
-                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProfilePage(); });
-
-                prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-                nextMonthBtn.addEventListener('click', () => changeMonth(1));
+                emailInput.value = 'admin@jaiswal.com';
+                passwordInput.value = 'Jaiswal@123';
             }
 
-            // Start the app
-            init();
-        })();
+            // Event listeners
+            loginBtn.addEventListener('click', handleLogin);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && loginScreen.style.display !== 'none') handleLogin();
+            });
+            logoutBtn.addEventListener('click', handleLogout);
+
+            addWorkerBtn.addEventListener('click', openAddModal);
+            modalCancelBtn.addEventListener('click', () => { workerModal.style.display = 'none'; });
+            modalSaveBtn.addEventListener('click', saveWorker);
+            workerModal.addEventListener('click', (e) => { if (e.target === workerModal) workerModal.style.display = 'none'; });
+
+            profileCloseBtn.addEventListener('click', closeProfilePage);
+            profileOverlay.addEventListener('click', (e) => { if (e.target === profileOverlay) closeProfilePage(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProfilePage(); });
+
+            prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+            nextMonthBtn.addEventListener('click', () => changeMonth(1));
+        }
+
+        // Start the app
+        init();
     </script>
 </body>
 </html>

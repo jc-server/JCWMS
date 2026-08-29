@@ -555,6 +555,8 @@
             margin-left: 0.4rem;
         }
         .profile-summary .value.gold { color: #e8b86d; }
+        .profile-summary .value.positive { color: #4caf50; }
+        .profile-summary .value.negative { color: #f44336; }
         .month-nav {
             display: flex;
             align-items: center;
@@ -748,7 +750,6 @@
         }
         .loading-overlay.show-timeout .retry-btn { display: inline-block; }
 
-        /* Toast notifications */
         .toast-container {
             position: fixed;
             top: 1.5rem;
@@ -795,13 +796,25 @@
         @keyframes slideOut {
             to { transform: translateX(100%); opacity: 0; }
         }
+
+        /* Daily table extra columns */
+        .wage-rate-display {
+            font-weight: 600;
+            color: #e8b86d;
+            font-size: 0.85rem;
+        }
+        .balance-amount {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .balance-positive { color: #4caf50; }
+        .balance-negative { color: #f44336; }
+        .balance-zero { color: #9bb0c2; }
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text" id="loadingText">Loading...</div>
@@ -810,7 +823,6 @@
     </div>
 
     <div class="app-container">
-        <!-- LOGIN -->
         <div id="loginScreen">
             <div class="login-brand">
                 <h1><i class="fas fa-hard-hat"></i> Jaiswal · Dark</h1>
@@ -832,7 +844,6 @@
             </div>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="dashboardScreen">
             <div class="dash-header">
                 <h2><i class="fas fa-helmet-safety"></i> Jaiswal · Workforce</h2>
@@ -850,7 +861,6 @@
                 <div class="stat-card"><div class="label"><i class="fas fa-hand-holding-dollar"></i> Advance</div><div class="value" id="totalAdvance">₹ 0</div></div>
             </div>
 
-            <!-- MANAGE WORKERS -->
             <div class="manage-section">
                 <div class="manage-header">
                     <div class="section-title"><i class="fas fa-users-gear"></i> Manage Workers</div>
@@ -864,12 +874,21 @@
                 </div>
             </div>
 
-            <!-- DAILY ATTENDANCE -->
             <div class="worker-section">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Daily attendance & payments</div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Worker</th><th>Attendance</th><th>Paid (₹)</th><th>Balance</th><th>Profile</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Worker</th>
+                                <th>Status</th>
+                                <th>Wage Rate</th>
+                                <th>Paid (₹)</th>
+                                <th>Balance</th>
+                                <th>Total Paid</th>
+                                <th>Profile</th>
+                            </tr>
+                        </thead>
                         <tbody id="workerTableBody"></tbody>
                     </table>
                 </div>
@@ -877,7 +896,6 @@
         </div>
     </div>
 
-    <!-- MODAL -->
     <div class="modal-overlay" id="workerModal">
         <div class="modal-box">
             <h3 id="modalTitle"><i class="fas fa-user-plus"></i> Add Worker</h3>
@@ -896,7 +914,6 @@
         </div>
     </div>
 
-    <!-- PROFILE PAGE OVERLAY -->
     <div class="profile-page-overlay" id="profilePageOverlay">
         <div class="profile-page-card">
             <div class="profile-page-header">
@@ -907,7 +924,7 @@
             <div class="profile-summary">
                 <div>Total Paid <span class="value" id="profileTotalPaid">₹ 0</span></div>
                 <div>Advance <span class="value" id="profileAdvance">₹ 0</span></div>
-                <div>Balance <span class="value gold" id="profileBalance">₹ 0</span></div>
+                <div>Balance <span class="value" id="profileBalance">₹ 0</span></div>
             </div>
             <div class="month-nav">
                 <button id="prevMonthBtn"><i class="fas fa-chevron-left"></i> Prev</button>
@@ -997,12 +1014,7 @@
         //  TOAST SYSTEM
         // ============================================================
         function showToast(message, type = 'info', duration = 4000) {
-            const icons = {
-                success: '✅',
-                error: '❌',
-                warning: '⚠️',
-                info: 'ℹ️'
-            };
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -1060,7 +1072,6 @@
             try {
                 showLoading('Signing in...');
                 if (!supabaseClient) throw new Error('Supabase client not initialized');
-                
                 const loginPromise = supabaseClient.auth.signInWithPassword({ email, password });
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error('Login request timed out.')), 15000)
@@ -1169,8 +1180,7 @@
                         supabaseClient.from('workers').update({
                             name: worker.name, role: worker.role,
                             daily_rate: worker.daily_rate,
-                            advance: worker.advance || 0,
-                            total_paid: worker.total_paid || 0
+                            advance: worker.advance || 0
                         }).eq('id', worker.id).select(), 10000
                     );
                     const { data, error } = queryResult;
@@ -1181,8 +1191,7 @@
                         supabaseClient.from('workers').insert({
                             name: worker.name, role: worker.role,
                             daily_rate: worker.daily_rate,
-                            advance: worker.advance || 0,
-                            total_paid: 0
+                            advance: worker.advance || 0
                         }).select(), 10000
                     );
                     const { data, error } = queryResult;
@@ -1238,18 +1247,39 @@
         }
 
         // ============================================================
-        //  CALCULATE BALANCE
+        //  BALANCE CALCULATION - FIXED LOGIC
         // ============================================================
-        function calculateBalance(worker) {
-            const totalPaid = worker.total_paid || 0;
-            const advance = worker.advance || 0;
-            return totalPaid - advance;
+        function calculateTotalPaid(workerId) {
+            // Sum ALL payments from ALL attendance records
+            const atts = attendanceMap[workerId] || {};
+            let total = 0;
+            for (const date in atts) {
+                const entry = atts[date];
+                total += entry.payment || 0;
+            }
+            return total;
+        }
+
+        function getWageRate(workerId, date) {
+            const worker = workers.find(w => w.id === workerId);
+            if (!worker) return 0;
+            const entry = attendanceMap[workerId]?.[date];
+            if (!entry || entry.status === 'absent') return 0;
+            if (entry.status === 'half') return Math.round((worker.daily_rate || 0) * 0.5);
+            return worker.daily_rate || 0;
+        }
+
+        function getDayBalance(workerId, date) {
+            const wage = getWageRate(workerId, date);
+            const paid = attendanceMap[workerId]?.[date]?.payment || 0;
+            return wage - paid;
         }
 
         function getWorkerBalance(workerId) {
+            const totalPaid = calculateTotalPaid(workerId);
             const worker = workers.find(w => w.id === workerId);
-            if (!worker) return 0;
-            return calculateBalance(worker);
+            const advance = worker?.advance || 0;
+            return totalPaid - advance;
         }
 
         // ============================================================
@@ -1258,7 +1288,7 @@
         function renderManageTable() {
             let html = '';
             workers.forEach(w => {
-                const balance = calculateBalance(w);
+                const balance = getWorkerBalance(w.id);
                 html += `
                     <tr>
                         <td><span class="worker-name"><i class="fas fa-user"></i> ${w.name}</span></td>
@@ -1318,25 +1348,37 @@
 
             let html = '';
             workers.forEach(w => {
-                const att = attendanceMap[w.id]?.[todayStr] || { status: 'present', payment: 0 };
-                const isPresent = att.status !== 'absent';
+                const todayStr2 = getTodayStr();
+                const att = attendanceMap[w.id]?.[todayStr2] || { status: 'present', payment: 0 };
+                const status = att.status || 'present';
                 const paid = att.payment || 0;
-                const balance = calculateBalance(w) + (isPresent ? paid : 0);
-                const balanceDisplay = balance >= 0 ? `₹ ${balance}` : `-₹ ${Math.abs(balance)}`;
-                const balanceColor = balance >= 0 ? '#4caf50' : '#f44336';
+                const wageRate = getWageRate(w.id, todayStr2);
+                const dayBalance = wageRate - paid;
+                const totalPaid = calculateTotalPaid(w.id);
+                const overallBalance = totalPaid - (w.advance || 0);
+
+                let balanceClass = 'balance-zero';
+                if (dayBalance > 0) balanceClass = 'balance-positive';
+                else if (dayBalance < 0) balanceClass = 'balance-negative';
+
+                let totalPaidClass = 'balance-zero';
+                if (overallBalance > 0) totalPaidClass = 'balance-positive';
+                else if (overallBalance < 0) totalPaidClass = 'balance-negative';
 
                 html += `
                     <tr>
                         <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${w.name}</span></td>
                         <td>
                             <div class="attendance-toggle">
-                                <button data-id="${w.id}" data-val="present" class="${att.status === 'present' ? 'active' : ''}">P</button>
-                                <button data-id="${w.id}" data-val="absent" class="${att.status === 'absent' ? 'active' : ''}">A</button>
-                                <button data-id="${w.id}" data-val="half" class="${att.status === 'half' ? 'active' : ''}">½</button>
+                                <button data-id="${w.id}" data-val="present" class="${status === 'present' ? 'active' : ''}">P</button>
+                                <button data-id="${w.id}" data-val="absent" class="${status === 'absent' ? 'active' : ''}">A</button>
+                                <button data-id="${w.id}" data-val="half" class="${status === 'half' ? 'active' : ''}">½</button>
                             </div>
                         </td>
+                        <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
                         <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" /></td>
-                        <td><span style="font-weight:600; color:${balanceColor};">${balanceDisplay}</span></td>
+                        <td><span class="balance-amount ${balanceClass}">${dayBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(dayBalance)}</span></td>
+                        <td><span class="balance-amount ${totalPaidClass}">₹ ${totalPaid}</span></td>
                         <td><button class="profile-btn" data-id="${w.id}"><i class="fas fa-address-card"></i> View</button></td>
                     </tr>
                 `;
@@ -1349,35 +1391,34 @@
                     e.stopPropagation();
                     const id = parseInt(this.dataset.id);
                     const status = this.dataset.val;
-                    const todayStr = getTodayStr();
+                    const todayStr2 = getTodayStr();
                     const worker = workers.find(w => w.id === id);
                     if (!worker) return;
 
                     if (!attendanceMap[id]) attendanceMap[id] = {};
-                    if (!attendanceMap[id][todayStr]) {
-                        attendanceMap[id][todayStr] = { status: 'present', payment: 0, remark: '' };
+                    if (!attendanceMap[id][todayStr2]) {
+                        attendanceMap[id][todayStr2] = { status: 'present', payment: 0, remark: '' };
                     }
-                    attendanceMap[id][todayStr].status = status;
+                    attendanceMap[id][todayStr2].status = status;
                     
-                    // Auto-calculate payment based on status
                     if (status === 'absent') {
-                        attendanceMap[id][todayStr].payment = 0;
+                        attendanceMap[id][todayStr2].payment = 0;
                     } else if (status === 'half') {
-                        attendanceMap[id][todayStr].payment = Math.round((worker.daily_rate || 0) * 0.5);
+                        attendanceMap[id][todayStr2].payment = Math.round((worker.daily_rate || 0) * 0.5);
                     } else {
-                        attendanceMap[id][todayStr].payment = worker.daily_rate || 0;
+                        attendanceMap[id][todayStr2].payment = worker.daily_rate || 0;
                     }
 
                     try {
                         await saveAttendanceToSupabase([{
                             worker_id: id,
-                            date: todayStr,
-                            status: attendanceMap[id][todayStr].status,
-                            payment: attendanceMap[id][todayStr].payment,
-                            remark: attendanceMap[id][todayStr].remark || ''
+                            date: todayStr2,
+                            status: attendanceMap[id][todayStr2].status,
+                            payment: attendanceMap[id][todayStr2].payment,
+                            remark: attendanceMap[id][todayStr2].remark || ''
                         }]);
-                        renderDailyTable();
-                        renderManageTable();
+                        await refreshAttendanceData(id);
+                        fullRender();
                         showToast(`Attendance marked as ${status} for ${worker.name}`, 'success');
                     } catch (error) {
                         showToast('Failed to save attendance: ' + error.message, 'error');
@@ -1391,26 +1432,26 @@
                     const id = parseInt(this.dataset.id);
                     let val = parseFloat(this.value);
                     if (isNaN(val) || val < 0) val = 0;
-                    const todayStr = getTodayStr();
+                    const todayStr2 = getTodayStr();
                     const worker = workers.find(w => w.id === id);
                     if (!worker) return;
 
                     if (!attendanceMap[id]) attendanceMap[id] = {};
-                    if (!attendanceMap[id][todayStr]) {
-                        attendanceMap[id][todayStr] = { status: 'present', payment: val, remark: '' };
+                    if (!attendanceMap[id][todayStr2]) {
+                        attendanceMap[id][todayStr2] = { status: 'present', payment: val, remark: '' };
                     }
-                    attendanceMap[id][todayStr].payment = val;
+                    attendanceMap[id][todayStr2].payment = val;
 
                     try {
                         await saveAttendanceToSupabase([{
                             worker_id: id,
-                            date: todayStr,
-                            status: attendanceMap[id][todayStr].status || 'present',
+                            date: todayStr2,
+                            status: attendanceMap[id][todayStr2].status || 'present',
                             payment: val,
-                            remark: attendanceMap[id][todayStr].remark || ''
+                            remark: attendanceMap[id][todayStr2].remark || ''
                         }]);
-                        renderDailyTable();
-                        renderManageTable();
+                        await refreshAttendanceData(id);
+                        fullRender();
                         showToast(`Payment updated for ${worker.name}`, 'info');
                     } catch (error) {
                         showToast('Failed to save payment: ' + error.message, 'error');
@@ -1427,6 +1468,22 @@
                     openProfilePage(id);
                 });
             });
+        }
+
+        async function refreshAttendanceData(workerId) {
+            try {
+                const attData = await loadAttendanceForWorker(workerId);
+                if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
+                attData.forEach(att => {
+                    attendanceMap[workerId][att.date] = {
+                        status: att.status,
+                        payment: att.payment || 0,
+                        remark: att.remark || ''
+                    };
+                });
+            } catch (error) {
+                console.error('Error refreshing attendance:', error);
+            }
         }
 
         function fullRender() {
@@ -1483,14 +1540,9 @@
             }
 
             try {
-                const workerData = {
-                    name, role, daily_rate, advance,
-                    total_paid: 0
-                };
+                const workerData = { name, role, daily_rate, advance };
                 if (editingWorkerId !== null) {
                     workerData.id = editingWorkerId;
-                    const existing = workers.find(w => w.id === editingWorkerId);
-                    if (existing) workerData.total_paid = existing.total_paid || 0;
                 }
 
                 const saved = await saveWorkerToSupabase(workerData);
@@ -1545,7 +1597,7 @@
             const w = workers.find(w => w.id === workerId);
             if (!w) return;
             
-            const totalPaid = w.total_paid || 0;
+            const totalPaid = calculateTotalPaid(workerId);
             const adv = w.advance || 0;
             const balance = totalPaid - adv;
             
@@ -1608,7 +1660,6 @@
 
             calendarGrid.innerHTML = gridHtml;
 
-            // Day action handlers
             document.querySelectorAll('.day-block').forEach(block => {
                 const date = block.dataset.date;
                 if (!date) return;
@@ -1640,8 +1691,8 @@
                                 remark: attendanceMap[workerId][date].remark || ''
                             }]);
 
-                            const todayStr = getTodayStr();
-                            if (date === todayStr) {
+                            const todayStr2 = getTodayStr();
+                            if (date === todayStr2) {
                                 fullRender();
                             }
                             updateProfileSummary(workerId);
@@ -1653,7 +1704,6 @@
                     });
                 });
 
-                // Payment input handler
                 const paymentInput = block.querySelector('.day-payment-input');
                 if (paymentInput) {
                     paymentInput.addEventListener('change', async function() {
@@ -1675,8 +1725,8 @@
                                 remark: attendanceMap[workerId][date].remark || ''
                             }]);
 
-                            const todayStr = getTodayStr();
-                            if (date === todayStr) {
+                            const todayStr2 = getTodayStr();
+                            if (date === todayStr2) {
                                 fullRender();
                             }
                             updateProfileSummary(workerId);
@@ -1687,7 +1737,6 @@
                     });
                 }
 
-                // Remark input handler - PERSISTENT
                 const remarkInput = block.querySelector('.day-remark-input');
                 if (remarkInput) {
                     remarkInput.addEventListener('change', async function() {
@@ -1705,8 +1754,7 @@
                                 date: date,
                                 status: attendanceMap[workerId][date].status || 'present',
                                 payment: attendanceMap[workerId][date].payment || 0,
-                                remark: remark
-                            }]);
+                                remark: remark                            }]);
                             showToast('Remark saved successfully', 'success');
                         } catch (error) {
                             showToast('Failed to save remark: ' + error.message, 'error');
@@ -1808,9 +1856,6 @@
                         remark: att.remark || ''
                     };
                 });
-
-                // DO NOT auto-create attendance for new workers
-                // This prevents balance from showing incorrectly
             } catch (error) {
                 console.error('❌ Error loading data:', error);
                 showToast('Failed to load data: ' + error.message, 'error');
@@ -1852,7 +1897,6 @@
                 passwordInput.value = 'Jaiswal@123';
             }
 
-            // Event listeners
             loginBtn.addEventListener('click', handleLogin);
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && loginScreen.style.display !== 'none') handleLogin();
@@ -1872,7 +1916,6 @@
             nextMonthBtn.addEventListener('click', () => changeMonth(1));
         }
 
-        // Start the app
         init();
     </script>
 </body>

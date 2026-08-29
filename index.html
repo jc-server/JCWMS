@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase JS - Using CDN with specific version -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <style>
+        /* ... (all your existing styles remain the same) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -841,13 +842,21 @@
         const SUPABASE_URL = 'https://cvfhkoeyqbtoezdbdaac.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_08z68ANZXn5bOYELHVPSwA_Pi6Za1h4';
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase client with proper error handling
+        let supabaseClient = null;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase client initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize Supabase client:', error);
+            alert('Failed to initialize Supabase. Please refresh the page.');
+        }
 
         // ============================================================
         //  GLOBAL STATE
         // ============================================================
         let workers = [];
-        let attendanceMap = {}; // { workerId: { '2024-01-01': { status, payment, remark } } }
+        let attendanceMap = {};
         let currentProfileWorkerId = null;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -917,14 +926,26 @@
         async function loginWithSupabase(email, password) {
             try {
                 showLoading();
-                const { data, error } = await supabase.auth.signInWithPassword({
+                console.log('🔐 Attempting login for:', email);
+                
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
-                if (error) throw error;
+                
+                if (error) {
+                    console.error('❌ Login error:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Login successful:', data.user.email);
                 return { success: true, user: data.user };
             } catch (error) {
-                console.error('Login error:', error.message);
+                console.error('❌ Login error:', error.message);
                 return { success: false, error: error.message };
             } finally {
                 hideLoading();
@@ -934,10 +955,13 @@
         async function logoutFromSupabase() {
             try {
                 showLoading();
-                await supabase.auth.signOut();
+                if (supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
+                console.log('✅ Logout successful');
                 return { success: true };
             } catch (error) {
-                console.error('Logout error:', error.message);
+                console.error('❌ Logout error:', error.message);
                 return { success: false };
             } finally {
                 hideLoading();
@@ -946,14 +970,20 @@
 
         async function checkAuth() {
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
+                
                 if (session) {
+                    console.log('✅ User already logged in:', session.user.email);
                     return { success: true, user: session.user };
                 }
                 return { success: false };
             } catch (error) {
-                console.error('Auth check error:', error.message);
+                console.error('❌ Auth check error:', error.message);
                 return { success: false };
             }
         }
@@ -964,15 +994,21 @@
         async function loadWorkersFromSupabase() {
             try {
                 showLoading();
-                const { data, error } = await supabase
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabaseClient
                     .from('workers')
                     .select('*')
                     .order('id');
+                    
                 if (error) throw error;
                 workers = data || [];
+                console.log(`📊 Loaded ${workers.length} workers`);
                 return workers;
             } catch (error) {
-                console.error('Error loading workers:', error.message);
+                console.error('❌ Error loading workers:', error.message);
                 alert('Failed to load workers: ' + error.message);
                 return [];
             } finally {
@@ -982,27 +1018,37 @@
 
         async function loadAttendanceForWorker(workerId) {
             try {
-                const { data, error } = await supabase
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabaseClient
                     .from('attendance')
                     .select('*')
                     .eq('worker_id', workerId);
+                    
                 if (error) throw error;
                 return data || [];
             } catch (error) {
-                console.error('Error loading attendance:', error.message);
+                console.error('❌ Error loading attendance:', error.message);
                 return [];
             }
         }
 
         async function loadAllAttendance() {
             try {
-                const { data, error } = await supabase
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabaseClient
                     .from('attendance')
                     .select('*');
+                    
                 if (error) throw error;
                 return data || [];
             } catch (error) {
-                console.error('Error loading all attendance:', error.message);
+                console.error('❌ Error loading all attendance:', error.message);
                 return [];
             }
         }
@@ -1010,10 +1056,13 @@
         async function saveWorkerToSupabase(worker) {
             try {
                 showLoading();
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
                 let result;
                 if (worker.id) {
-                    // Update
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('workers')
                         .update({
                             name: worker.name,
@@ -1024,11 +1073,11 @@
                         })
                         .eq('id', worker.id)
                         .select();
+                        
                     if (error) throw error;
                     result = data[0];
                 } else {
-                    // Insert
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('workers')
                         .insert({
                             name: worker.name,
@@ -1038,12 +1087,14 @@
                             total_paid: worker.total_paid || 0
                         })
                         .select();
+                        
                     if (error) throw error;
                     result = data[0];
                 }
+                console.log(`💾 Saved worker: ${result.name}`);
                 return result;
             } catch (error) {
-                console.error('Error saving worker:', error.message);
+                console.error('❌ Error saving worker:', error.message);
                 alert('Failed to save worker: ' + error.message);
                 throw error;
             } finally {
@@ -1054,22 +1105,27 @@
         async function deleteWorkerFromSupabase(id) {
             try {
                 showLoading();
-                // First delete all attendance records for this worker
-                const { error: attError } = await supabase
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { error: attError } = await supabaseClient
                     .from('attendance')
                     .delete()
                     .eq('worker_id', id);
+                    
                 if (attError) throw attError;
 
-                // Then delete the worker
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('workers')
                     .delete()
                     .eq('id', id);
+                    
                 if (error) throw error;
+                console.log(`🗑️ Deleted worker ID: ${id}`);
                 return { success: true };
             } catch (error) {
-                console.error('Error deleting worker:', error.message);
+                console.error('❌ Error deleting worker:', error.message);
                 alert('Failed to delete worker: ' + error.message);
                 throw error;
             } finally {
@@ -1080,17 +1136,23 @@
         async function saveAttendanceToSupabase(attendanceData) {
             try {
                 showLoading();
-                const { data, error } = await supabase
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabaseClient
                     .from('attendance')
                     .upsert(attendanceData, {
                         onConflict: 'worker_id,date',
                         ignoreDuplicates: false
                     })
                     .select();
+                    
                 if (error) throw error;
+                console.log(`💾 Saved attendance for ${attendanceData.length} records`);
                 return data;
             } catch (error) {
-                console.error('Error saving attendance:', error.message);
+                console.error('❌ Error saving attendance:', error.message);
                 alert('Failed to save attendance: ' + error.message);
                 throw error;
             } finally {
@@ -1187,7 +1249,6 @@
             });
             tbody.innerHTML = html;
 
-            // Attendance toggles
             tbody.querySelectorAll('.attendance-toggle button').forEach(btn => {
                 btn.addEventListener('click', async function(e) {
                     e.stopPropagation();
@@ -1223,7 +1284,6 @@
                 });
             });
 
-            // Payment inputs
             tbody.querySelectorAll('.paid-input').forEach(inp => {
                 inp.addEventListener('change', async function() {
                     const id = parseInt(this.dataset.id);
@@ -1250,7 +1310,6 @@
                 });
             });
 
-            // Profile buttons
             tbody.querySelectorAll('.profile-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = parseInt(this.dataset.id);
@@ -1367,7 +1426,6 @@
             profileWorkerName.textContent = w.name;
             profileWorkerRole.textContent = w.role;
 
-            // Load attendance for this worker
             const attData = await loadAttendanceForWorker(workerId);
             if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
             attData.forEach(att => {
@@ -1447,7 +1505,6 @@
 
             calendarGrid.innerHTML = gridHtml;
 
-            // Attach events
             document.querySelectorAll('.day-block').forEach(block => {
                 const date = block.dataset.date;
                 if (!date) return;
@@ -1559,6 +1616,12 @@
                 return;
             }
 
+            if (!supabaseClient) {
+                loginError.textContent = 'Supabase client not initialized. Please refresh.';
+                loginError.style.display = 'flex';
+                return;
+            }
+
             const result = await loginWithSupabase(email, password);
 
             if (result.success) {
@@ -1594,7 +1657,6 @@
                 showLoading();
                 workers = await loadWorkersFromSupabase();
 
-                // Load attendance for all workers
                 const allAtt = await loadAllAttendance();
                 attendanceMap = {};
                 allAtt.forEach(att => {
@@ -1606,7 +1668,6 @@
                     };
                 });
 
-                // Ensure today exists for all workers
                 const todayStr = getTodayStr();
                 for (const w of workers) {
                     if (!attendanceMap[w.id]) attendanceMap[w.id] = {};
@@ -1626,7 +1687,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('❌ Error loading data:', error);
                 alert('Failed to load data. Please refresh the page.');
             } finally {
                 hideLoading();
@@ -1637,15 +1698,24 @@
         //  INIT
         // ============================================================
         async function init() {
-            // Check if user is already logged in
+            console.log('🚀 Initializing Jaiswal Workers Management System...');
+            
+            if (!supabaseClient) {
+                console.error('❌ Supabase client failed to initialize');
+                alert('Failed to initialize Supabase. Please check your internet connection and refresh.');
+                return;
+            }
+
             const auth = await checkAuth();
             if (auth.success) {
+                console.log('✅ User already logged in, showing dashboard');
                 loginScreen.style.display = 'none';
                 dashboardScreen.style.display = 'block';
                 userEmailSpan.textContent = auth.user.email;
                 await loadData();
                 fullRender();
             } else {
+                console.log('🔐 User not logged in, showing login screen');
                 loginScreen.style.display = 'flex';
                 dashboardScreen.style.display = 'none';
                 loginError.style.display = 'none';

@@ -990,10 +990,39 @@
         }
 
         /* ============================================================
-           COLOR-CODED STATUS INDICATORS
+           ADVANCE AND OVERPAYMENT BADGES
            ============================================================ */
 
-        /* Status labels in attendance column */
+        .overpayment-badge {
+            display: inline-block;
+            background: #2a1f0a;
+            color: #ff6b6b;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.8rem;
+            font-size: 0.5rem;
+            font-weight: 600;
+            border: 1px solid #ff6b6b;
+            white-space: nowrap;
+            animation: pulse-badge 2s infinite;
+        }
+
+        @media (min-width: 480px) {
+            .overpayment-badge {
+                padding: 0.15rem 0.6rem;
+                font-size: 0.6rem;
+            }
+        }
+
+        @keyframes pulse-badge {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         .status-label {
             display: inline-block;
             padding: 0.1rem 0.4rem;
@@ -1011,10 +1040,29 @@
             }
         }
 
-        /* 🟢 Green: Paid exactly (Settled) or Net Balance positive */
         .status-label.settled {
             background: #1a3a1a;
             color: #4caf50;
+        }
+
+        .status-label.due {
+            background: #3a1a1a;
+            color: #f44336;
+        }
+
+        .status-label.advance-only {
+            background: #2a1f0a;
+            color: #e8b86d;
+        }
+
+        .status-label.no-work {
+            background: var(--bg-input);
+            color: var(--text-muted);
+        }
+
+        .status-label.overpaid {
+            background: #2a1f0a;
+            color: #ff6b6b;
         }
 
         .balance-positive {
@@ -1022,21 +1070,9 @@
             font-weight: 700;
         }
 
-        /* 🔴 Red: Due payment (need to pay more) or Net Balance negative */
-        .status-label.due {
-            background: #3a1a1a;
-            color: #f44336;
-        }
-
         .balance-negative {
             color: #f44336 !important;
             font-weight: 700;
-        }
-
-        /* 🟠 Gold/Orange: Advance taken with no work */
-        .status-label.advance-only {
-            background: #2a1f0a;
-            color: #e8b86d;
         }
 
         .advance-gold {
@@ -1044,18 +1080,11 @@
             font-weight: 700;
         }
 
-        /* ⚪ White/Gray: No work and no advance */
-        .status-label.no-work {
-            background: var(--bg-input);
-            color: var(--text-muted);
-        }
-
         .balance-zero {
             color: var(--text-muted) !important;
             font-weight: 600;
         }
 
-        /* Advance badge */
         .advance-badge {
             display: inline-block;
             background: #2a1f0a;
@@ -1064,9 +1093,19 @@
             border-radius: 0.8rem;
             font-size: 0.5rem;
             font-weight: 600;
-            margin-left: 0.3rem;
             border: 1px solid #e8b86d;
             white-space: nowrap;
+            animation: pulse-advance 3s infinite;
+        }
+
+        @keyframes pulse-advance {
+            0%,
+            100% {
+                border-color: #e8b86d;
+            }
+            50% {
+                border-color: #ff6b6b;
+            }
         }
 
         @media (min-width: 480px) {
@@ -1076,7 +1115,6 @@
             }
         }
 
-        /* Advance management button */
         .advance-btn {
             background: #2a1f0a;
             border: 1px solid #e8b86d;
@@ -1106,7 +1144,7 @@
             color: var(--bg-primary);
         }
 
-        /* Table row color coding */
+        /* Row color coding */
         tr td:has(.balance-positive) {
             border-left: 3px solid #4caf50;
         }
@@ -1311,7 +1349,6 @@
             background: #4a637c;
         }
 
-        /* Advance summary in modal */
         .advance-summary {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -2360,17 +2397,17 @@
         } catch (error) {
             console.error('❌ Failed to initialize Supabase:', error);
             document.body.innerHTML = `
-                <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1219;color:#eef3f8;padding:1rem;text-align:center;">
-                    <div style="max-width:400px;">
-                        <h1 style="color:#e8b86d;font-size:2rem;margin-bottom:1rem;">⚠️</h1>
-                        <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">Connection Error</h2>
-                        <p style="color:#9bb0c2;margin-bottom:1rem;">Failed to connect to the server. Please check your internet connection and refresh the page.</p>
-                        <button onclick="location.reload()" style="background:#e8b86d;border:none;color:#0b1219;padding:0.6rem 1.5rem;border-radius:2rem;font-weight:700;cursor:pointer;font-size:0.9rem;">
-                            🔄 Refresh Page
-                        </button>
-                    </div>
-                </div>
-            `;
+                        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1219;color:#eef3f8;padding:1rem;text-align:center;">
+                            <div style="max-width:400px;">
+                                <h1 style="color:#e8b86d;font-size:2rem;margin-bottom:1rem;">⚠️</h1>
+                                <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">Connection Error</h2>
+                                <p style="color:#9bb0c2;margin-bottom:1rem;">Failed to connect to the server. Please check your internet connection and refresh the page.</p>
+                                <button onclick="location.reload()" style="background:#e8b86d;border:none;color:#0b1219;padding:0.6rem 1.5rem;border-radius:2rem;font-weight:700;cursor:pointer;font-size:0.9rem;">
+                                    🔄 Refresh Page
+                                </button>
+                            </div>
+                        </div>
+                    `;
         }
 
         // ============================================================
@@ -2615,6 +2652,7 @@
                         status: att.status,
                         payment: att.payment || 0,
                         remark: att.remark || '',
+                        wageRate: 0,
                     });
                 });
                 this._notify('attendance-bulk-updated');
@@ -2727,10 +2765,10 @@
                 toast.setAttribute('aria-live', 'polite');
 
                 toast.innerHTML = `
-                    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-                    <span class="toast-message">${this._escapeHtml(message)}</span>
-                    <button class="toast-close" aria-label="Close notification"><i class="fas fa-times"></i></button>
-                `;
+                            <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                            <span class="toast-message">${this._escapeHtml(message)}</span>
+                            <button class="toast-close" aria-label="Close notification"><i class="fas fa-times"></i></button>
+                        `;
 
                 this.container.appendChild(toast);
                 this._toasts.push(toast);
@@ -3127,7 +3165,11 @@
 
                     if (workers.length > 0) {
                         const allAttendance = await apiService.getAttendance();
-                        appState.setBulkAttendance(allAttendance);
+                        const attData = allAttendance.map(att => ({
+                            ...att,
+                            wageRate: 0
+                        }));
+                        appState.setBulkAttendance(attData);
                     }
 
                     this._renderAll();
@@ -3288,19 +3330,19 @@
                 let html = '';
                 workers.forEach(w => {
                     html += `
-                        <tr>
-                            <td><span class="worker-name"><i class="fas fa-user"></i> ${this._escapeHtml(w.name)}</span></td>
-                            <td><span class="role-badge">${this._escapeHtml(w.role)}</span></td>
-                            <td>₹ ${w.daily_rate}</td>
-                            <td>₹ ${w.advance || 0}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="edit-btn" data-id="${w.id}" aria-label="Edit worker"><i class="fas fa-pen"></i> Edit</button>
-                                    <button class="delete-btn" data-id="${w.id}" aria-label="Delete worker"><i class="fas fa-trash"></i> Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                                <tr>
+                                    <td><span class="worker-name"><i class="fas fa-user"></i> ${this._escapeHtml(w.name)}</span></td>
+                                    <td><span class="role-badge">${this._escapeHtml(w.role)}</span></td>
+                                    <td>₹ ${w.daily_rate}</td>
+                                    <td>₹ ${w.advance || 0}</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <button class="edit-btn" data-id="${w.id}" aria-label="Edit worker"><i class="fas fa-pen"></i> Edit</button>
+                                            <button class="delete-btn" data-id="${w.id}" aria-label="Delete worker"><i class="fas fa-trash"></i> Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
                 });
 
                 tbody.innerHTML = html;
@@ -3348,47 +3390,51 @@
                     let dayStatusIcon = '';
 
                     if (advance > 0 && wageRate === 0) {
-                        // 🟠 Gold/Orange: Advance taken with no work
                         dayStatus = 'Advance';
                         dayStatusClass = 'advance-only';
                         dayStatusIcon = '🟠';
                     } else if (dayBalance > 0 && wageRate > 0) {
-                        // 🔴 Red: Due payment (need to pay more)
                         dayStatus = 'Due';
                         dayStatusClass = 'due';
                         dayStatusIcon = '🔴';
                     } else if (dayBalance === 0 && wageRate > 0) {
-                        // 🟢 Green: Paid exactly (Settled)
                         dayStatus = 'Settled';
                         dayStatusClass = 'settled';
                         dayStatusIcon = '🟢';
                     } else if (wageRate === 0 && advance === 0) {
-                        // ⚪ White/Gray: No work and no advance
                         dayStatus = 'No Work';
                         dayStatusClass = 'no-work';
                         dayStatusIcon = '⚪';
+                    } else if (dayBalance < 0 && wageRate > 0) {
+                        dayStatus = 'Overpaid';
+                        dayStatusClass = 'overpaid';
+                        dayStatusIcon = '💵';
                     }
 
-                    // Day Balance Display with correct color
+                    // Day Balance Display
                     let dayBalanceDisplay = '';
                     if (advance > 0 && wageRate === 0) {
                         dayBalanceDisplay =
                             `<span class="balance-amount advance-gold">🟠 Advance: ₹${advance}</span>`;
                     } else if (dayBalance > 0) {
                         dayBalanceDisplay =
-                            `<span class="balance-amount balance-negative">🔴 -₹${Math.abs(dayBalance)}</span>`;
+                            `<span class="balance-amount balance-negative">🔴 Due: ₹${dayBalance}</span>`;
                     } else if (dayBalance === 0 && wageRate > 0) {
                         dayBalanceDisplay = `<span class="balance-amount balance-positive">🟢 ₹0</span>`;
                     } else if (wageRate === 0 && advance === 0) {
                         dayBalanceDisplay = `<span class="balance-amount balance-zero">⚪ ₹0</span>`;
+                    } else if (dayBalance < 0 && wageRate > 0) {
+                        dayBalanceDisplay =
+                            `<span class="balance-amount advance-gold">💵 +₹${Math.abs(dayBalance)} to Advance</span>`;
                     } else {
                         dayBalanceDisplay = `<span class="balance-amount balance-zero">₹${dayBalance}</span>`;
                     }
 
-                    // Net Balance Display with correct color
+                    // Net Balance Display
                     let netBalanceDisplay = '';
                     if (netBalance > 0) {
-                        netBalanceDisplay = `<span class="balance-amount balance-positive">🟢 ₹${netBalance}</span>`;
+                        netBalanceDisplay =
+                            `<span class="balance-amount balance-positive">🟢 ₹${netBalance}</span>`;
                     } else if (netBalance < 0) {
                         netBalanceDisplay =
                             `<span class="balance-amount balance-negative">🔴 -₹${Math.abs(netBalance)}</span>`;
@@ -3396,32 +3442,47 @@
                         netBalanceDisplay = `<span class="balance-amount balance-zero">⚪ ₹0</span>`;
                     }
 
+                    // Badges
+                    let advanceBadge = '';
+                    if (advance > 0) {
+                        advanceBadge =
+                            `<span class="advance-badge" title="Total Advance: ₹${advance}">🟠 Adv: ₹${advance}</span>`;
+                    }
+
+                    let overpaymentIndicator = '';
+                    if (dayBalance < 0 && wageRate > 0) {
+                        overpaymentIndicator = `<span class="overpayment-badge">💵 Overpaid</span>`;
+                    }
+
                     html += `
-                        <tr>
-                            <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${this._escapeHtml(w.name)}</span></td>
-                            <td>
-                                <div class="attendance-toggle">
-                                    <button data-id="${w.id}" data-val="present" class="${status === 'present' ? 'active' : ''}" aria-label="Mark present">P</button>
-                                    <button data-id="${w.id}" data-val="absent" class="${status === 'absent' ? 'active' : ''}" aria-label="Mark absent">A</button>
-                                    <button data-id="${w.id}" data-val="half" class="${status === 'half' ? 'active' : ''}" aria-label="Mark half day">½</button>
-                                </div>
-                                <span class="status-label ${dayStatusClass}">${dayStatusIcon} ${dayStatus}</span>
-                            </td>
-                            <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
-                            <td>
-                                <input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" aria-label="Payment amount" />
-                                ${advance > 0 ? `<span class="advance-badge" title="Advance: ₹${advance}">🟠 Adv: ₹${advance}</span>` : ''}
-                            </td>
-                            <td>${dayBalanceDisplay}</td>
-                            <td><span class="balance-amount balance-zero">₹ ${totals.totalWage}</span></td>
-                            <td><span class="balance-amount balance-zero">₹ ${totals.totalPaid}</span></td>
-                            <td>${netBalanceDisplay}</td>
-                            <td>
-                                <button class="profile-btn" data-id="${w.id}" aria-label="View profile"><i class="fas fa-address-card"></i> View</button>
-                                <button class="advance-btn" data-id="${w.id}" aria-label="Manage advance"><i class="fas fa-hand-holding-dollar"></i></button>
-                            </td>
-                        </tr>
-                    `;
+                                <tr>
+                                    <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${this._escapeHtml(w.name)}</span></td>
+                                    <td>
+                                        <div class="attendance-toggle">
+                                            <button data-id="${w.id}" data-val="present" class="${status === 'present' ? 'active' : ''}" aria-label="Mark present">P</button>
+                                            <button data-id="${w.id}" data-val="absent" class="${status === 'absent' ? 'active' : ''}" aria-label="Mark absent">A</button>
+                                            <button data-id="${w.id}" data-val="half" class="${status === 'half' ? 'active' : ''}" aria-label="Mark half day">½</button>
+                                        </div>
+                                        <span class="status-label ${dayStatusClass}">${dayStatusIcon} ${dayStatus}</span>
+                                    </td>
+                                    <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
+                                    <td>
+                                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.2rem;">
+                                            <input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" aria-label="Payment amount" />
+                                            ${advanceBadge}
+                                            ${overpaymentIndicator}
+                                        </div>
+                                    </td>
+                                    <td>${dayBalanceDisplay}</td>
+                                    <td><span class="balance-amount balance-zero">₹ ${totals.totalWage}</span></td>
+                                    <td><span class="balance-amount balance-zero">₹ ${totals.totalPaid}</span></td>
+                                    <td>${netBalanceDisplay}</td>
+                                    <td>
+                                        <button class="profile-btn" data-id="${w.id}" aria-label="View profile"><i class="fas fa-address-card"></i> View</button>
+                                        <button class="advance-btn" data-id="${w.id}" aria-label="Manage advance"><i class="fas fa-hand-holding-dollar"></i></button>
+                                    </td>
+                                </tr>
+                            `;
                 });
 
                 tbody.innerHTML = html;
@@ -3609,7 +3670,11 @@
                     if (saved.id) {
                         const attendance = await apiService.getAttendance(saved.id);
                         if (attendance.length > 0) {
-                            appState.setBulkAttendance(attendance);
+                            const attData = attendance.map(att => ({
+                                ...att,
+                                wageRate: 0
+                            }));
+                            appState.setBulkAttendance(attData);
                         }
                     }
 
@@ -3630,7 +3695,7 @@
 
                 if (!confirm(
                         `Are you sure you want to delete "${worker.name}"? This will also delete all their attendance records and cannot be undone.`
-                        )) {
+                    )) {
                     return;
                 }
 
@@ -3660,7 +3725,7 @@
             }
 
             // ============================================================
-            //  ATTENDANCE OPERATIONS
+            //  ATTENDANCE OPERATIONS WITH ADVANCE LOGIC
             // ============================================================
             async _handleAttendanceChange(btn) {
                 if (this._isProcessing) return;
@@ -3778,15 +3843,65 @@
                     return;
                 }
 
-                const currentAtt = appState.getAttendance(id, today) || { status: 'present', payment: 0, remark: '' };
+                const currentAtt = appState.getAttendance(id, today) || {
+                    status: 'present',
+                    payment: 0,
+                    remark: ''
+                };
+
+                const wageRate = this._calculateWageRate(id, today);
+                const difference = payment - wageRate;
+
+                let newAdvance = worker.advance || 0;
+                let message = '';
+
+                if (difference > 0) {
+                    // Overpaid - add extra to advance
+                    newAdvance = (worker.advance || 0) + difference;
+                    message = `💵 ₹${difference} overpayment added to advance. Total advance: ₹${newAdvance}`;
+                } else if (difference < 0) {
+                    // Underpaid - keep as liability (balance)
+                    message = `🔴 ₹${Math.abs(difference)} remaining to pay (liability)`;
+                } else {
+                    message = '✅ Payment matched wage rate';
+                }
+
+                // Update local state
                 appState.setAttendance(id, today, {
                     ...currentAtt,
                     payment: payment,
+                    wageRate: wageRate,
                 });
 
-                this._renderDailyTable();
-                this._updateStats();
+                // If overpaid, update the worker's advance
+                if (difference > 0) {
+                    try {
+                        const sessionCheck = await this._authService.getSession();
+                        if (!sessionCheck.session) {
+                            throw new Error('Session expired. Please login again.');
+                        }
 
+                        const updatedWorker = await apiService.saveWorker({
+                            ...worker,
+                            advance: newAdvance
+                        });
+
+                        const idx = appState.workers.findIndex(w => w.id === id);
+                        if (idx !== -1) {
+                            appState.workers[idx] = updatedWorker;
+                        }
+
+                        appState._notify('workers-updated');
+                    } catch (error) {
+                        console.error('Update advance error:', error);
+                        toastManager.error('Failed to update advance: ' + error.message);
+                        this._renderDailyTable();
+                        this._updateStats();
+                        return;
+                    }
+                }
+
+                // Save attendance
                 this._isProcessing = true;
                 try {
                     const sessionCheck = await this._authService.getSession();
@@ -3802,7 +3917,27 @@
                         remark: currentAtt.remark || '',
                     }]);
 
-                    toastManager.success(`Payment updated for ${worker.name}`);
+                    const freshAttendance = await apiService.getAttendance(id);
+                    const freshMap = new Map();
+                    freshAttendance.forEach(att => {
+                        let attWageRate = 0;
+                        if (att.status === 'present') {
+                            attWageRate = worker.daily_rate || 0;
+                        } else if (att.status === 'half') {
+                            attWageRate = Math.round((worker.daily_rate || 0) * 0.5);
+                        }
+                        freshMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                            wageRate: attWageRate,
+                        });
+                    });
+                    appState._attendance.set(id, freshMap);
+
+                    toastManager.success(message);
+                    this._renderDailyTable();
+                    this._updateStats();
                 } catch (error) {
                     console.error('Payment save error:', error);
                     toastManager.error('Failed to save payment: ' + error.message);
@@ -3847,48 +3982,48 @@
                 modal.className = 'modal-overlay active';
                 modal.id = 'advanceModal';
                 modal.innerHTML = `
-                    <div class="modal-box">
-                        <h3><i class="fas fa-hand-holding-dollar"></i> Manage Advance</h3>
-                        <p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:0.9rem;">
-                            <i class="fas fa-user"></i> ${this._escapeHtml(worker.name)}
-                        </p>
-                        
-                        <label>Current Advance</label>
-                        <div style="background:var(--bg-input);padding:0.8rem;border-radius:var(--radius);border:1px solid var(--border-color);margin-bottom:1rem;">
-                            <span style="font-size:1.2rem;font-weight:700;color:var(--accent);">₹ ${worker.advance || 0}</span>
-                        </div>
-                        
-                        <label for="advanceAmount">Update Advance Amount (₹)</label>
-                        <input type="number" id="advanceAmount" placeholder="Enter advance amount" min="0" step="10" value="${worker.advance || 0}" />
-                        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">
-                            <i class="fas fa-info-circle"></i> Enter 0 to remove advance
-                        </div>
-                        
-                        <div class="advance-summary">
-                            <div class="advance-summary-item">
-                                <span class="label">Total Wage</span>
-                                <span class="value">₹ ${totals.totalWage}</span>
+                            <div class="modal-box">
+                                <h3><i class="fas fa-hand-holding-dollar"></i> Manage Advance</h3>
+                                <p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:0.9rem;">
+                                    <i class="fas fa-user"></i> ${this._escapeHtml(worker.name)}
+                                </p>
+
+                                <label>Current Advance</label>
+                                <div style="background:var(--bg-input);padding:0.8rem;border-radius:var(--radius);border:1px solid var(--border-color);margin-bottom:1rem;">
+                                    <span style="font-size:1.2rem;font-weight:700;color:var(--accent);">₹ ${worker.advance || 0}</span>
+                                </div>
+
+                                <label for="advanceAmount">Update Advance Amount (₹)</label>
+                                <input type="number" id="advanceAmount" placeholder="Enter advance amount" min="0" step="10" value="${worker.advance || 0}" />
+                                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">
+                                    <i class="fas fa-info-circle"></i> Enter 0 to remove advance
+                                </div>
+
+                                <div class="advance-summary">
+                                    <div class="advance-summary-item">
+                                        <span class="label">Total Wage</span>
+                                        <span class="value">₹ ${totals.totalWage}</span>
+                                    </div>
+                                    <div class="advance-summary-item">
+                                        <span class="label">Total Paid</span>
+                                        <span class="value">₹ ${totals.totalPaid}</span>
+                                    </div>
+                                    <div class="advance-summary-item">
+                                        <span class="label">Current Advance</span>
+                                        <span class="value gold">₹ ${worker.advance || 0}</span>
+                                    </div>
+                                    <div class="advance-summary-item">
+                                        <span class="label">Net Balance</span>
+                                        <span class="value ${totals.netBalance >= 0 ? 'positive' : 'negative'}">₹ ${totals.netBalance}</span>
+                                    </div>
+                                </div>
+
+                                <div class="modal-actions">
+                                    <button class="save-btn" id="advanceSaveBtn"><i class="fas fa-save"></i> Update</button>
+                                    <button class="cancel-btn" id="advanceCancelBtn">Cancel</button>
+                                </div>
                             </div>
-                            <div class="advance-summary-item">
-                                <span class="label">Total Paid</span>
-                                <span class="value">₹ ${totals.totalPaid}</span>
-                            </div>
-                            <div class="advance-summary-item">
-                                <span class="label">Current Advance</span>
-                                <span class="value gold">₹ ${worker.advance || 0}</span>
-                            </div>
-                            <div class="advance-summary-item">
-                                <span class="label">Net Balance</span>
-                                <span class="value ${totals.netBalance >= 0 ? 'positive' : 'negative'}">₹ ${totals.netBalance}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="modal-actions">
-                            <button class="save-btn" id="advanceSaveBtn"><i class="fas fa-save"></i> Update</button>
-                            <button class="cancel-btn" id="advanceCancelBtn">Cancel</button>
-                        </div>
-                    </div>
-                `;
+                        `;
 
                 document.body.appendChild(modal);
 
@@ -4073,25 +4208,25 @@
                     const remark = entry.remark || '';
 
                     gridHtml += `
-                        <div class="day-block" data-date="${dateStr}">
-                            <div class="day-label">
-                                <span>${day}</span>
-                                <span class="status-badge">${status}</span>
-                            </div>
-                            <div class="day-actions">
-                                <button class="${status === 'present' ? 'active-status' : ''}" data-status="present" aria-label="Mark present">P</button>
-                                <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent" aria-label="Mark absent">A</button>
-                                <button class="${status === 'half' ? 'active-status' : ''}" data-status="half" aria-label="Mark half day">½</button>
-                            </div>
-                            <div class="day-payment">
-                                <i class="fas fa-coins" style="color:var(--accent);"></i>
-                                <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" aria-label="Payment amount" />
-                            </div>
-                            <div class="day-remark">
-                                <input type="text" class="day-remark-input" value="${this._escapeHtml(remark)}" placeholder="remark" aria-label="Remark" />
-                            </div>
-                        </div>
-                    `;
+                                <div class="day-block" data-date="${dateStr}">
+                                    <div class="day-label">
+                                        <span>${day}</span>
+                                        <span class="status-badge">${status}</span>
+                                    </div>
+                                    <div class="day-actions">
+                                        <button class="${status === 'present' ? 'active-status' : ''}" data-status="present" aria-label="Mark present">P</button>
+                                        <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent" aria-label="Mark absent">A</button>
+                                        <button class="${status === 'half' ? 'active-status' : ''}" data-status="half" aria-label="Mark half day">½</button>
+                                    </div>
+                                    <div class="day-payment">
+                                        <i class="fas fa-coins" style="color:var(--accent);"></i>
+                                        <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" aria-label="Payment amount" />
+                                    </div>
+                                    <div class="day-remark">
+                                        <input type="text" class="day-remark-input" value="${this._escapeHtml(remark)}" placeholder="remark" aria-label="Remark" />
+                                    </div>
+                                </div>
+                            `;
                 }
 
                 this._getDom('calendarGrid').innerHTML = gridHtml;

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>Jaiswal · Workers Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Jaiswal · Workforce Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js">
@@ -12,43 +12,72 @@
         /* ============================================================
            RESET & BASE
            ============================================================ */
-        * {
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0b1219;
+            --bg-secondary: #141e2a;
+            --bg-card: #1c2938;
+            --bg-input: #0f1a26;
+            --border-color: #2a3a4a;
+            --border-light: #2f4458;
+            --text-primary: #eef3f8;
+            --text-secondary: #c6d9e8;
+            --text-muted: #9bb0c2;
+            --accent: #e8b86d;
+            --accent-hover: #f0c87d;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --radius: 1.5rem;
+            --radius-sm: 0.8rem;
+            --shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8);
+            --transition: 0.2s ease;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #0b1219;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0.5rem;
-            color: #eef3f8;
+            color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            line-height: 1.5;
         }
 
         .app-container {
             width: 100%;
             max-width: 1400px;
-            background: #141e2a;
-            border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8);
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             overflow: hidden;
-            border: 1px solid #2a3a4a;
+            border: 1px solid var(--border-color);
             margin: 0 auto;
+            position: relative;
         }
 
         @media (min-width: 768px) {
-            .app-container {
-                border-radius: 2.5rem;
-                padding: 0;
-            }
             body {
                 padding: 1rem;
+            }
+            .app-container {
+                border-radius: 2.5rem;
             }
         }
 
@@ -60,10 +89,10 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f1a26;
+            background: var(--bg-primary);
         }
         ::-webkit-scrollbar-thumb {
-            background: #2f4458;
+            background: var(--border-light);
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
@@ -79,7 +108,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem 1rem 2.5rem;
-            background: #141e2a;
+            background: var(--bg-secondary);
             min-height: 100vh;
             width: 100%;
         }
@@ -99,17 +128,17 @@
         .login-brand h1 {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             letter-spacing: -0.02em;
         }
 
         .login-brand h1 i {
-            color: #e8b86d;
+            color: var(--accent);
             margin-right: 0.5rem;
         }
 
         .login-brand p {
-            color: #9bb0c2;
+            color: var(--text-muted);
             font-weight: 500;
             margin-top: 0.25rem;
             font-size: 0.9rem;
@@ -125,12 +154,12 @@
         }
 
         .login-box {
-            background: #1c2938;
+            background: var(--bg-card);
             padding: 1.8rem 1.2rem;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             width: 100%;
             max-width: 400px;
-            border: 1px solid #2f4458;
+            border: 1px solid var(--border-light);
             margin-top: 1.5rem;
         }
 
@@ -145,7 +174,7 @@
         .login-box label {
             font-weight: 600;
             font-size: 0.85rem;
-            color: #c6d9e8;
+            color: var(--text-secondary);
             display: block;
             margin-top: 1rem;
             margin-bottom: 0.4rem;
@@ -153,19 +182,19 @@
 
         .login-box label i {
             margin-right: 0.5rem;
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         .login-box input {
             width: 100%;
             padding: 0.8rem 1rem;
-            border: 1.5px solid #2f4458;
-            border-radius: 1.5rem;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius);
             font-size: 1rem;
-            background: #0f1a26;
-            color: #eef3f8;
-            transition: 0.2s;
-            font-family: 'Inter', sans-serif;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: var(--transition);
+            font-family: inherit;
             -webkit-appearance: none;
             appearance: none;
         }
@@ -178,7 +207,7 @@
 
         .login-box input:focus {
             outline: none;
-            border-color: #e8b86d;
+            border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(232, 184, 109, 0.15);
             background: #14202e;
         }
@@ -187,20 +216,21 @@
             margin-top: 1.5rem;
             width: 100%;
             padding: 0.8rem;
-            background: #e8b86d;
-            color: #0b1219;
+            background: var(--accent);
+            color: var(--bg-primary);
             font-weight: 700;
             font-size: 1rem;
             border: none;
             border-radius: 2rem;
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             touch-action: manipulation;
+            position: relative;
         }
 
         @media (min-width: 480px) {
@@ -212,7 +242,7 @@
         }
 
         .login-btn:hover:not(:disabled) {
-            background: #f0c87d;
+            background: var(--accent-hover);
             transform: scale(1.01);
         }
 
@@ -229,7 +259,7 @@
             display: none;
             width: 20px;
             height: 20px;
-            border: 2px solid #0b1219;
+            border: 2px solid var(--bg-primary);
             border-radius: 50%;
             border-top-color: transparent;
             animation: spin 0.8s linear infinite;
@@ -268,7 +298,7 @@
         #dashboardScreen {
             display: none;
             padding: 1rem;
-            background: #141e2a;
+            background: var(--bg-secondary);
             min-height: 100vh;
         }
 
@@ -296,7 +326,7 @@
         .dash-header h2 {
             font-size: 1.4rem;
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
@@ -304,7 +334,7 @@
         }
 
         .dash-header h2 i {
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         @media (min-width: 640px) {
@@ -320,16 +350,16 @@
         }
 
         .dash-header .badge {
-            background: #1f3142;
+            background: var(--border-color);
             padding: 0.4rem 0.8rem;
             border-radius: 2rem;
-            color: #c6d9e8;
+            color: var(--text-secondary);
             font-weight: 600;
             font-size: 0.75rem;
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            border: 1px solid #2f4458;
+            border: 1px solid var(--border-light);
             white-space: nowrap;
         }
 
@@ -338,10 +368,6 @@
                 padding: 0.5rem 1.2rem;
                 font-size: 0.85rem;
             }
-        }
-
-        .dash-header .badge i {
-            font-size: 0.7rem;
         }
 
         .dash-header-actions {
@@ -361,17 +387,17 @@
 
         .logout-btn {
             background: transparent;
-            border: 1.5px solid #e8b86d;
+            border: 1.5px solid var(--accent);
             padding: 0.4rem 1rem;
             border-radius: 2rem;
             font-weight: 600;
-            color: #e8b86d;
+            color: var(--accent);
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             font-size: 0.8rem;
             touch-action: manipulation;
             white-space: nowrap;
@@ -385,8 +411,8 @@
         }
 
         .logout-btn:hover {
-            background: #e8b86d;
-            color: #0b1219;
+            background: var(--accent);
+            color: var(--bg-primary);
         }
 
         .logout-btn:active {
@@ -417,17 +443,22 @@
         }
 
         .stat-card {
-            background: #1c2938;
+            background: var(--bg-card);
             padding: 1rem 0.8rem 0.8rem;
-            border-radius: 1.2rem;
-            border: 1px solid #2a3a4a;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
             min-width: 0;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-light);
         }
 
         @media (min-width: 480px) {
             .stat-card {
                 padding: 1.2rem 1.2rem 1rem;
-                border-radius: 1.8rem;
+                border-radius: var(--radius);
             }
         }
 
@@ -435,7 +466,7 @@
             font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            color: #9bb0c2;
+            color: var(--text-muted);
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -458,7 +489,7 @@
         .stat-card .value {
             font-size: 1.4rem;
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             margin-top: 0.2rem;
             word-break: break-word;
         }
@@ -479,10 +510,10 @@
            MANAGE SECTION
            ============================================================ */
         .manage-section {
-            background: #1c2938;
-            border-radius: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
             padding: 1rem 0.8rem 1.2rem;
-            border: 1px solid #2a3a4a;
+            border: 1px solid var(--border-color);
             margin-bottom: 1.5rem;
         }
 
@@ -504,7 +535,7 @@
 
         .manage-header .section-title {
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             font-size: 1.1rem;
             display: flex;
             align-items: center;
@@ -512,7 +543,7 @@
         }
 
         .manage-header .section-title i {
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         @media (min-width: 480px) {
@@ -522,15 +553,15 @@
         }
 
         .add-worker-btn {
-            background: #e8b86d;
+            background: var(--accent);
             border: none;
-            color: #0b1219;
+            color: var(--bg-primary);
             padding: 0.4rem 1rem;
             border-radius: 2rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
@@ -547,7 +578,7 @@
         }
 
         .add-worker-btn:hover {
-            background: #f0c87d;
+            background: var(--accent-hover);
         }
 
         .add-worker-btn:active {
@@ -586,11 +617,11 @@
             text-align: left;
             padding: 0.4rem 0.6rem;
             font-weight: 600;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             font-size: 0.65rem;
             letter-spacing: 0.3px;
-            background: #14202e;
-            border-radius: 0.8rem 0.8rem 0 0;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
         }
 
         @media (min-width: 480px) {
@@ -602,11 +633,11 @@
         }
 
         .manage-table td {
-            background: #0f1a26;
+            background: var(--bg-input);
             padding: 0.5rem 0.6rem;
-            border-radius: 0.8rem;
+            border-radius: var(--radius-sm);
             vertical-align: middle;
-            border: 1px solid #253544;
+            border: 1px solid var(--border-color);
             font-size: 0.75rem;
         }
 
@@ -620,7 +651,7 @@
 
         .manage-table .worker-name {
             font-weight: 600;
-            color: #f0f6fc;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 0.4rem;
@@ -635,7 +666,7 @@
         }
 
         .manage-table .worker-name i {
-            color: #e8b86d;
+            color: var(--accent);
             font-size: 0.8rem;
         }
 
@@ -646,16 +677,16 @@
         }
 
         .manage-table .action-btns button {
-            background: #2f4458;
+            background: var(--border-light);
             border: none;
             padding: 0.2rem 0.5rem;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             font-size: 0.6rem;
             font-weight: 600;
-            color: #eef3f8;
+            color: var(--text-primary);
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 0.2rem;
@@ -678,11 +709,11 @@
             background: #9c4a4a;
         }
         .manage-table .role-badge {
-            background: #1f3142;
+            background: var(--border-color);
             padding: 0.1rem 0.5rem;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             font-size: 0.6rem;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             white-space: nowrap;
         }
 
@@ -697,10 +728,10 @@
            WORKER SECTION (Daily Table)
            ============================================================ */
         .worker-section {
-            background: #1c2938;
-            border-radius: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
             padding: 1rem 0.8rem 1.2rem;
-            border: 1px solid #2a3a4a;
+            border: 1px solid var(--border-color);
         }
 
         @media (min-width: 480px) {
@@ -712,7 +743,7 @@
 
         .section-title {
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             font-size: 1.1rem;
             margin-bottom: 1rem;
             display: flex;
@@ -721,7 +752,7 @@
         }
 
         .section-title i {
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         @media (min-width: 480px) {
@@ -763,11 +794,11 @@
             text-align: left;
             padding: 0.4rem 0.5rem;
             font-weight: 600;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             font-size: 0.6rem;
             letter-spacing: 0.3px;
-            background: #14202e;
-            border-radius: 0.8rem 0.8rem 0 0;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
         }
 
         @media (min-width: 480px) {
@@ -779,11 +810,11 @@
         }
 
         td {
-            background: #0f1a26;
+            background: var(--bg-input);
             padding: 0.5rem 0.5rem;
-            border-radius: 0.8rem;
+            border-radius: var(--radius-sm);
             vertical-align: middle;
-            border: 1px solid #253544;
+            border: 1px solid var(--border-color);
             font-size: 0.7rem;
         }
 
@@ -797,7 +828,7 @@
 
         .worker-name {
             font-weight: 600;
-            color: #f0f6fc;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 0.4rem;
@@ -812,7 +843,7 @@
         }
 
         .worker-name i {
-            color: #e8b86d;
+            color: var(--accent);
             font-size: 0.8rem;
         }
 
@@ -829,16 +860,16 @@
         }
 
         .attendance-toggle button {
-            background: #1f3142;
+            background: var(--border-color);
             border: none;
             padding: 0.2rem 0.5rem;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             font-size: 0.6rem;
             font-weight: 600;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: 0.1s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             border: 1px solid transparent;
             touch-action: manipulation;
             min-width: 28px;
@@ -859,23 +890,29 @@
         }
 
         .attendance-toggle button.active {
-            background: #e8b86d;
-            color: #0b1219;
-            border-color: #e8b86d;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .attendance-toggle button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .paid-input {
             width: 60px;
             padding: 0.2rem 0.3rem;
-            border: 1.5px solid #2f4458;
-            border-radius: 1.5rem;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius);
             font-weight: 600;
             font-size: 0.7rem;
-            background: #0f1a26;
-            color: #eef3f8;
-            font-family: 'Inter', sans-serif;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-family: inherit;
             -webkit-appearance: none;
             appearance: none;
+            transition: var(--transition);
         }
 
         @media (min-width: 480px) {
@@ -888,12 +925,17 @@
 
         .paid-input:focus {
             outline: none;
-            border-color: #e8b86d;
+            border-color: var(--accent);
+        }
+
+        .paid-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .wage-rate-display {
             font-weight: 600;
-            color: #e8b86d;
+            color: var(--accent);
             font-size: 0.7rem;
         }
 
@@ -915,26 +957,26 @@
         }
 
         .balance-positive {
-            color: #4caf50;
+            color: var(--success);
         }
         .balance-negative {
-            color: #f44336;
+            color: var(--danger);
         }
         .balance-zero {
-            color: #9bb0c2;
+            color: var(--text-muted);
         }
 
         .profile-btn {
-            background: #e8b86d;
+            background: var(--accent);
             border: none;
-            color: #0b1219;
+            color: var(--bg-primary);
             padding: 0.3rem 0.6rem;
             border-radius: 2rem;
             font-size: 0.6rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
@@ -951,7 +993,7 @@
         }
 
         .profile-btn:hover {
-            background: #f0c87d;
+            background: var(--accent-hover);
         }
         .profile-btn:active {
             transform: scale(0.95);
@@ -974,17 +1016,22 @@
             justify-content: center;
             align-items: center;
             padding: 1rem;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
         }
 
         .modal-box {
-            background: #1c2938;
+            background: var(--bg-card);
             max-width: 480px;
             width: 100%;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             padding: 1.5rem 1.2rem 1.8rem;
-            border: 1px solid #2f4458;
+            border: 1px solid var(--border-light);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-            animation: modalFade 0.2s ease;
+            animation: slideUp 0.2s ease;
             margin: 1rem;
             max-height: 90vh;
             overflow-y: auto;
@@ -998,19 +1045,28 @@
             }
         }
 
-        @keyframes modalFade {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
             }
         }
 
         .modal-box h3 {
-            color: #f0f6fc;
+            color: var(--text-primary);
             font-size: 1.2rem;
             margin-bottom: 1rem;
             display: flex;
@@ -1026,13 +1082,13 @@
         }
 
         .modal-box h3 i {
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         .modal-box label {
             display: block;
             font-weight: 600;
-            color: #c6d9e8;
+            color: var(--text-secondary);
             font-size: 0.8rem;
             margin-top: 0.8rem;
             margin-bottom: 0.3rem;
@@ -1049,14 +1105,15 @@
         .modal-box input {
             width: 100%;
             padding: 0.6rem 0.8rem;
-            border-radius: 1.5rem;
-            border: 1.5px solid #2f4458;
-            background: #0f1a26;
-            color: #eef3f8;
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border-light);
+            background: var(--bg-input);
+            color: var(--text-primary);
             font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             -webkit-appearance: none;
             appearance: none;
+            transition: var(--transition);
         }
 
         @media (min-width: 480px) {
@@ -1068,7 +1125,19 @@
 
         .modal-box input:focus {
             outline: none;
-            border-color: #e8b86d;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(232, 184, 109, 0.1);
+        }
+
+        .modal-box .input-error {
+            color: var(--danger);
+            font-size: 0.7rem;
+            margin-top: 0.2rem;
+            display: none;
+        }
+
+        .modal-box .input-error.show {
+            display: block;
         }
 
         .modal-actions {
@@ -1086,8 +1155,8 @@
             border-radius: 2rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             font-size: 0.85rem;
             touch-action: manipulation;
         }
@@ -1100,15 +1169,15 @@
         }
 
         .modal-actions .save-btn {
-            background: #e8b86d;
-            color: #0b1219;
+            background: var(--accent);
+            color: var(--bg-primary);
         }
         .modal-actions .save-btn:hover {
-            background: #f0c87d;
+            background: var(--accent-hover);
         }
         .modal-actions .cancel-btn {
-            background: #2f4458;
-            color: #eef3f8;
+            background: var(--border-light);
+            color: var(--text-primary);
         }
         .modal-actions .cancel-btn:hover {
             background: #4a637c;
@@ -1132,6 +1201,11 @@
             overflow-y: auto;
             justify-content: center;
             align-items: flex-start;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .profile-page-overlay.active {
+            display: flex;
         }
 
         @media (min-width: 480px) {
@@ -1141,16 +1215,17 @@
         }
 
         .profile-page-card {
-            background: #1c2938;
+            background: var(--bg-card);
             max-width: 1200px;
             width: 100%;
-            border-radius: 1.5rem;
+            border-radius: var(--radius);
             padding: 1rem 0.8rem 1.5rem;
-            border: 1px solid #2f4458;
+            border: 1px solid var(--border-light);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
             margin: 0.5rem auto;
             position: relative;
             overflow: hidden;
+            animation: slideUp 0.2s ease;
         }
 
         @media (min-width: 480px) {
@@ -1173,14 +1248,14 @@
         .profile-page-header h2 {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #f0f6fc;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
         .profile-page-header h2 i {
-            color: #e8b86d;
+            color: var(--accent);
         }
 
         @media (min-width: 480px) {
@@ -1196,10 +1271,10 @@
         }
 
         .profile-page-header .role-tag {
-            background: #2f4458;
+            background: var(--border-light);
             padding: 0.2rem 0.8rem;
             border-radius: 2rem;
-            color: #d4e2f0;
+            color: var(--text-secondary);
             font-weight: 600;
             font-size: 0.7rem;
         }
@@ -1212,15 +1287,15 @@
         }
 
         .profile-close-btn {
-            background: #2f4458;
+            background: var(--border-light);
             border: none;
-            color: #f0f6fc;
+            color: var(--text-primary);
             padding: 0.4rem 0.8rem;
             border-radius: 2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             display: flex;
             align-items: center;
             gap: 0.3rem;
@@ -1244,11 +1319,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
-            background: #14202e;
+            background: var(--bg-input);
             padding: 0.8rem;
-            border-radius: 1.2rem;
+            border-radius: var(--radius-sm);
             margin-bottom: 1rem;
-            border: 1px solid #2a3a4a;
+            border: 1px solid var(--border-color);
         }
 
         @media (min-width: 480px) {
@@ -1256,14 +1331,14 @@
                 grid-template-columns: repeat(4, 1fr);
                 gap: 1rem;
                 padding: 1rem 1.5rem;
-                border-radius: 2rem;
+                border-radius: var(--radius);
                 margin-bottom: 1.5rem;
             }
         }
 
         .profile-summary div {
             font-weight: 500;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             font-size: 0.7rem;
         }
 
@@ -1274,7 +1349,7 @@
         }
 
         .profile-summary .value {
-            color: #f0f6fc;
+            color: var(--text-primary);
             font-weight: 700;
             margin-left: 0.2rem;
             font-size: 0.8rem;
@@ -1288,13 +1363,13 @@
         }
 
         .profile-summary .value.gold {
-            color: #e8b86d;
+            color: var(--accent);
         }
         .profile-summary .value.positive {
-            color: #4caf50;
+            color: var(--success);
         }
         .profile-summary .value.negative {
-            color: #f44336;
+            color: var(--danger);
         }
 
         /* ============================================================
@@ -1312,7 +1387,7 @@
         .month-nav .month-label {
             font-weight: 700;
             font-size: 1rem;
-            color: #f0f6fc;
+            color: var(--text-primary);
         }
 
         @media (min-width: 480px) {
@@ -1322,15 +1397,15 @@
         }
 
         .month-nav button {
-            background: #2f4458;
+            background: var(--border-light);
             border: none;
-            color: #f0f6fc;
+            color: var(--text-primary);
             padding: 0.3rem 0.8rem;
             border-radius: 2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.15s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
@@ -1379,12 +1454,12 @@
 
         .calendar-grid .day-header {
             font-weight: 600;
-            color: #9bb0c2;
+            color: var(--text-muted);
             font-size: 0.6rem;
             text-align: center;
             padding: 0.2rem 0;
-            background: #14202e;
-            border-radius: 0.8rem;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
         }
 
         @media (min-width: 480px) {
@@ -1396,20 +1471,24 @@
         }
 
         .day-block {
-            background: #0f1a26;
-            border-radius: 0.8rem;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
             padding: 0.3rem 0.2rem 0.3rem;
-            border: 1px solid #2a3a4a;
-            transition: 0.1s;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
             min-height: 80px;
         }
 
+        .day-block:hover {
+            border-color: var(--border-light);
+        }
+
         @media (min-width: 480px) {
             .day-block {
-                border-radius: 1.2rem;
+                border-radius: var(--radius);
                 padding: 0.6rem 0.3rem 0.5rem;
                 gap: 0.3rem;
                 min-height: 110px;
@@ -1418,7 +1497,7 @@
 
         .day-block .day-label {
             font-weight: 600;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             font-size: 0.6rem;
             display: flex;
             justify-content: space-between;
@@ -1434,9 +1513,10 @@
 
         .day-block .day-label .status-badge {
             font-size: 0.5rem;
-            background: #1f3142;
+            background: var(--border-color);
             padding: 0.05rem 0.3rem;
             border-radius: 1rem;
+            text-transform: capitalize;
         }
 
         @media (min-width: 480px) {
@@ -1455,16 +1535,16 @@
         .day-actions button {
             flex: 1;
             min-width: 20px;
-            background: #1f3142;
+            background: var(--border-color);
             border: none;
-            border-radius: 0.8rem;
+            border-radius: var(--radius-sm);
             padding: 0.1rem 0;
             font-size: 0.5rem;
             font-weight: 600;
-            color: #b6ccdd;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: 0.1s;
-            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            font-family: inherit;
             border: 1px solid transparent;
             touch-action: manipulation;
             min-height: 22px;
@@ -1485,9 +1565,14 @@
         }
 
         .day-actions button.active-status {
-            background: #e8b86d;
-            color: #0b1219;
-            border-color: #e8b86d;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .day-actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .day-payment {
@@ -1510,15 +1595,16 @@
         .day-payment input {
             width: 40px;
             padding: 0.05rem 0.1rem;
-            border-radius: 0.8rem;
-            border: 1px solid #2f4458;
-            background: #0b1219;
-            color: #eef3f8;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-size: 0.5rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             text-align: center;
             -webkit-appearance: none;
             appearance: none;
+            transition: var(--transition);
         }
 
         @media (min-width: 480px) {
@@ -1532,21 +1618,27 @@
 
         .day-payment input:focus {
             outline: none;
-            border-color: #e8b86d;
+            border-color: var(--accent);
+        }
+
+        .day-payment input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .day-remark input {
             width: 100%;
             padding: 0.05rem 0.1rem;
-            border-radius: 0.8rem;
-            border: 1px solid #2f4458;
-            background: #0b1219;
-            color: #eef3f8;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-size: 0.45rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             text-align: center;
             -webkit-appearance: none;
             appearance: none;
+            transition: var(--transition);
         }
 
         @media (min-width: 480px) {
@@ -1559,13 +1651,13 @@
 
         .day-remark input:focus {
             outline: none;
-            border-color: #e8b86d;
+            border-color: var(--accent);
         }
 
         .empty-day {
             background: transparent;
-            border: 1px dashed #1f3142;
-            border-radius: 0.8rem;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-sm);
             min-height: 80px;
             display: flex;
             align-items: center;
@@ -1576,7 +1668,7 @@
 
         @media (min-width: 480px) {
             .empty-day {
-                border-radius: 1.2rem;
+                border-radius: var(--radius);
                 min-height: 110px;
                 font-size: 0.7rem;
             }
@@ -1599,14 +1691,20 @@
             flex-direction: column;
             gap: 1rem;
             padding: 2rem;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
         }
 
         .loading-overlay .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid #2f4458;
+            border: 4px solid var(--border-light);
             border-radius: 50%;
-            border-top-color: #e8b86d;
+            border-top-color: var(--accent);
             animation: spin 1s ease-in-out infinite;
         }
 
@@ -1618,7 +1716,7 @@
         }
 
         .loading-overlay .loading-text {
-            color: #c6d9e8;
+            color: var(--text-secondary);
             font-size: 0.9rem;
             font-weight: 500;
             text-align: center;
@@ -1641,16 +1739,20 @@
             display: block;
         }
         .loading-overlay .retry-btn {
-            background: #e8b86d;
+            background: var(--accent);
             border: none;
-            color: #0b1219;
+            color: var(--bg-primary);
             padding: 0.5rem 1.5rem;
             border-radius: 2rem;
             font-weight: 700;
             cursor: pointer;
             display: none;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             touch-action: manipulation;
+            transition: var(--transition);
+        }
+        .loading-overlay .retry-btn:hover {
+            background: var(--accent-hover);
         }
         .loading-overlay.show-timeout .retry-btn {
             display: inline-block;
@@ -1669,6 +1771,7 @@
             flex-direction: column;
             gap: 0.5rem;
             max-width: 100%;
+            pointer-events: none;
         }
 
         @media (min-width: 480px) {
@@ -1682,44 +1785,50 @@
         }
 
         .toast {
-            background: #1c2938;
+            background: var(--bg-card);
             padding: 0.8rem 1rem;
-            border-radius: 1.2rem;
-            border: 1px solid #2f4458;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             gap: 0.6rem;
             animation: slideIn 0.3s ease;
-            color: #eef3f8;
+            color: var(--text-primary);
             font-size: 0.8rem;
             width: 100%;
+            pointer-events: auto;
         }
 
         @media (min-width: 480px) {
             .toast {
                 padding: 1rem 1.5rem;
-                border-radius: 1.5rem;
+                border-radius: var(--radius);
                 font-size: 0.9rem;
                 gap: 0.8rem;
             }
         }
 
         .toast.success {
-            border-left: 4px solid #4caf50;
+            border-left: 4px solid var(--success);
         }
         .toast.error {
-            border-left: 4px solid #f44336;
+            border-left: 4px solid var(--danger);
         }
         .toast.warning {
-            border-left: 4px solid #ff9800;
+            border-left: 4px solid var(--warning);
         }
         .toast.info {
-            border-left: 4px solid #e8b86d;
+            border-left: 4px solid var(--accent);
         }
 
         .toast .toast-icon {
             font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .toast .toast-message {
+            flex: 1;
         }
 
         .toast .toast-close {
@@ -1731,6 +1840,12 @@
             font-size: 0.9rem;
             padding: 0.2rem 0.4rem;
             touch-action: manipulation;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .toast .toast-close:hover {
+            color: var(--text-primary);
         }
 
         @keyframes slideIn {
@@ -1823,6 +1938,17 @@
             }
         }
 
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
         /* Print styles */
         @media print {
             .app-container {
@@ -1862,8 +1988,10 @@
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text" id="loadingText">Loading...</div>
@@ -1871,29 +1999,30 @@
         <button class="retry-btn" id="retryBtn">🔄 Retry</button>
     </div>
 
+    <!-- App Container -->
     <div class="app-container">
+        <!-- Login Screen -->
         <div id="loginScreen">
             <div class="login-brand">
-                <h1><i class="fas fa-hard-hat"></i> Jaiswal · Dark</h1>
-                <p>Workers Management · secure</p>
+                <h1><i class="fas fa-hard-hat"></i> Jaiswal · Workforce</h1>
+                <p>Workers Management System</p>
             </div>
             <div class="login-box">
-                <label><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" id="emailInput" placeholder="your@email.com" value="admin@jaiswal.com" />
+                <label><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="username" />
                 <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="passwordInput" placeholder="••••••••" value="Jaiswal@123" />
+                <input type="password" id="passwordInput" placeholder="Enter your password" autocomplete="current-password" />
                 <button class="login-btn" id="loginBtn">
                     <span class="spinner"></span>
-                    <span class="btn-text"><i class="fas fa-arrow-right-to-bracket"></i> Sign in</span>
+                    <span class="btn-text"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</span>
                 </button>
                 <div class="login-error" id="loginError"><i class="fas fa-circle-exclamation"></i> <span id="errorText">Invalid credentials</span></div>
-                <div style="margin-top:1.2rem; font-size:0.7rem; color:#6a859e; text-align:center;">
-                    Demo: admin@jaiswal.com / Jaiswal@123
-                </div>
             </div>
         </div>
 
+        <!-- Dashboard Screen -->
         <div id="dashboardScreen">
+            <!-- Header -->
             <div class="dash-header">
                 <h2><i class="fas fa-helmet-safety"></i> Jaiswal · Workforce</h2>
                 <div class="dash-header-actions">
@@ -1903,13 +2032,15 @@
                 </div>
             </div>
 
+            <!-- Stats -->
             <div class="stats-grid" id="statsGrid">
-                <div class="stat-card"><div class="label"><i class="fas fa-people-group"></i> Total</div><div class="value" id="totalWorkers">0</div></div>
-                <div class="stat-card"><div class="label"><i class="fas fa-check-circle"></i> Present</div><div class="value" id="presentToday">0</div></div>
-                <div class="stat-card"><div class="label"><i class="fas fa-coins"></i> Paid today</div><div class="value" id="paidToday">₹ 0</div></div>
-                <div class="stat-card"><div class="label"><i class="fas fa-hand-holding-dollar"></i> Advance</div><div class="value" id="totalAdvance">₹ 0</div></div>
+                <div class="stat-card"><div class="label"><i class="fas fa-people-group"></i> Total Workers</div><div class="value" id="totalWorkers">0</div></div>
+                <div class="stat-card"><div class="label"><i class="fas fa-check-circle"></i> Present Today</div><div class="value" id="presentToday">0</div></div>
+                <div class="stat-card"><div class="label"><i class="fas fa-coins"></i> Paid Today</div><div class="value" id="paidToday">₹ 0</div></div>
+                <div class="stat-card"><div class="label"><i class="fas fa-hand-holding-dollar"></i> Total Advances</div><div class="value" id="totalAdvance">₹ 0</div></div>
             </div>
 
+            <!-- Manage Workers -->
             <div class="manage-section">
                 <div class="manage-header">
                     <div class="section-title"><i class="fas fa-users-gear"></i> Manage Workers</div>
@@ -1917,14 +2048,25 @@
                 </div>
                 <div class="worker-table-wrap">
                     <table class="manage-table">
-                        <thead><tr><th>Worker</th><th>Role</th><th>Daily Rate</th><th>Advance</th><th>Actions</th></tr></thead>
-                        <tbody id="manageTableBody"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Worker</th>
+                                <th>Role</th>
+                                <th>Daily Rate</th>
+                                <th>Advance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageTableBody">
+                            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No workers found. Add your first worker!</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- Daily Attendance -->
             <div class="worker-section">
-                <div class="section-title"><i class="fas fa-clipboard-list"></i> Daily attendance & payments</div>
+                <div class="section-title"><i class="fas fa-clipboard-list"></i> Daily Attendance & Payments</div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -1940,31 +2082,42 @@
                                 <th>Profile</th>
                             </tr>
                         </thead>
-                        <tbody id="workerTableBody"></tbody>
+                        <tbody id="workerTableBody">
+                            <tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">No workers available</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Worker Modal -->
     <div class="modal-overlay" id="workerModal">
         <div class="modal-box">
             <h3 id="modalTitle"><i class="fas fa-user-plus"></i> Add Worker</h3>
-            <label>Full Name</label>
+            <label for="modalName">Full Name *</label>
             <input type="text" id="modalName" placeholder="e.g. Rajesh Kumar" />
-            <label>Role</label>
+            <div class="input-error" id="modalNameError">Name is required</div>
+
+            <label for="modalRole">Role *</label>
             <input type="text" id="modalRole" placeholder="e.g. Mason" />
-            <label>Daily Rate (₹)</label>
-            <input type="number" id="modalDailyRate" placeholder="600" min="0" step="10" />
-            <label>Advance (₹) - Optional</label>
+            <div class="input-error" id="modalRoleError">Role is required</div>
+
+            <label for="modalDailyRate">Daily Rate (₹) *</label>
+            <input type="number" id="modalDailyRate" placeholder="600" min="1" step="10" />
+            <div class="input-error" id="modalRateError">Rate must be greater than 0</div>
+
+            <label for="modalAdvance">Advance (₹) <span style="color:var(--text-muted);font-weight:400;">(Optional)</span></label>
             <input type="number" id="modalAdvance" placeholder="0" min="0" step="10" value="0" />
+
             <div class="modal-actions">
-                <button class="save-btn" id="modalSaveBtn"><i class="fas fa-save"></i> Save</button>
+                <button class="save-btn" id="modalSaveBtn"><i class="fas fa-save"></i> Save Worker</button>
                 <button class="cancel-btn" id="modalCancelBtn">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- Profile Page -->
     <div class="profile-page-overlay" id="profilePageOverlay">
         <div class="profile-page-card">
             <div class="profile-page-header">
@@ -1989,15 +2142,30 @@
 
     <script>
         // ============================================================
-        //  SUPABASE CONFIGURATION
+        //  CONFIGURATION
         // ============================================================
-        const SUPABASE_URL = 'https://cvfhkoeyqbtoezdbdaac.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_08z68ANZXn5bOYELHVPSwA_Pi6Za1h4';
+        const CONFIG = {
+            SUPABASE_URL: 'https://cvfhkoeyqbtoezdbdaac.supabase.co',
+            SUPABASE_ANON_KEY: 'sb_publishable_08z68ANZXn5bOYELHVPSwA_Pi6Za1h4',
+            REQUEST_TIMEOUT: 15000,
+            MAX_RETRIES: 3,
+            RETRY_DELAY: 1000,
+            TOAST_DURATION: 4000,
+        };
 
+        // ============================================================
+        //  SUPABASE CLIENT
+        // ============================================================
         let supabaseClient = null;
+
         try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+            supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true,
+                    detectSessionInUrl: true,
+                    storage: window.localStorage,
+                },
             });
             console.log('✅ Supabase client initialized');
         } catch (error) {
@@ -2005,1020 +2173,1599 @@
         }
 
         // ============================================================
-        //  GLOBAL STATE
+        //  STATE MANAGEMENT
         // ============================================================
-        let workers = [];
-        let attendanceMap = {};
-        let currentProfileWorkerId = null;
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let editingWorkerId = null;
-        let loadingTimeoutId = null;
+        class AppState {
+            constructor() {
+                this._workers = [];
+                this._attendance = new Map();
+                this._currentUser = null;
+                this._isAuthenticated = false;
+                this._uiState = {
+                    currentMonth: new Date().getMonth(),
+                    currentYear: new Date().getFullYear(),
+                    selectedWorkerId: null,
+                    isLoading: false,
+                };
+                this._listeners = new Map();
+            }
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
-        const loginScreen = document.getElementById('loginScreen');
-        const dashboardScreen = document.getElementById('dashboardScreen');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginError = document.getElementById('loginError');
-        const errorText = document.getElementById('errorText');
-        const userEmailSpan = document.getElementById('userEmail');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-        const retryBtn = document.getElementById('retryBtn');
-        const toastContainer = document.getElementById('toastContainer');
+            get workers() { return this._workers; }
+            set workers(value) {
+                this._workers = value;
+                this._notify('workers-updated');
+            }
 
-        const tbody = document.getElementById('workerTableBody');
-        const manageTbody = document.getElementById('manageTableBody');
-        const totalWorkersEl = document.getElementById('totalWorkers');
-        const presentTodayEl = document.getElementById('presentToday');
-        const paidTodayEl = document.getElementById('paidToday');
-        const totalAdvanceEl = document.getElementById('totalAdvance');
-        const todayDateEl = document.getElementById('todayDate');
+            get attendance() { return this._attendance; }
 
-        const workerModal = document.getElementById('workerModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalName = document.getElementById('modalName');
-        const modalRole = document.getElementById('modalRole');
-        const modalDailyRate = document.getElementById('modalDailyRate');
-        const modalAdvance = document.getElementById('modalAdvance');
-        const modalSaveBtn = document.getElementById('modalSaveBtn');
-        const modalCancelBtn = document.getElementById('modalCancelBtn');
-        const addWorkerBtn = document.getElementById('addWorkerBtn');
+            get currentUser() { return this._currentUser; }
+            set currentUser(value) {
+                this._currentUser = value;
+                this._isAuthenticated = !!value;
+                this._notify('auth-change');
+            }
 
-        const profileOverlay = document.getElementById('profilePageOverlay');
-        const profileCloseBtn = document.getElementById('profileCloseBtn');
-        const profileWorkerName = document.getElementById('profileWorkerName');
-        const profileWorkerRole = document.getElementById('profileWorkerRole');
-        const profileTotalWage = document.getElementById('profileTotalWage');
-        const profileTotalPaid = document.getElementById('profileTotalPaid');
-        const profileAdvance = document.getElementById('profileAdvance');
-        const profileBalance = document.getElementById('profileBalance');
-        const calendarGrid = document.getElementById('calendarGrid');
-        const monthLabel = document.getElementById('monthLabel');
-        const prevMonthBtn = document.getElementById('prevMonthBtn');
-        const nextMonthBtn = document.getElementById('nextMonthBtn');
+            get isAuthenticated() { return this._isAuthenticated; }
+
+            get uiState() { return this._uiState; }
+
+            getWorker(id) {
+                return this._workers.find(w => w.id === id);
+            }
+
+            getAttendance(workerId, date) {
+                return this._attendance.get(workerId)?.get(date);
+            }
+
+            setAttendance(workerId, date, data) {
+                if (!this._attendance.has(workerId)) {
+                    this._attendance.set(workerId, new Map());
+                }
+                this._attendance.get(workerId).set(date, data);
+                this._notify('attendance-updated', { workerId, date });
+            }
+
+            setBulkAttendance(attendanceData) {
+                attendanceData.forEach(att => {
+                    if (!this._attendance.has(att.worker_id)) {
+                        this._attendance.set(att.worker_id, new Map());
+                    }
+                    this._attendance.get(att.worker_id).set(att.date, {
+                        status: att.status,
+                        payment: att.payment || 0,
+                        remark: att.remark || '',
+                    });
+                });
+                this._notify('attendance-bulk-updated');
+            }
+
+            clearAttendance(workerId) {
+                this._attendance.delete(workerId);
+                this._notify('attendance-cleared', { workerId });
+            }
+
+            subscribe(event, callback) {
+                if (!this._listeners.has(event)) {
+                    this._listeners.set(event, []);
+                }
+                this._listeners.get(event).push(callback);
+                return () => this._unsubscribe(event, callback);
+            }
+
+            _unsubscribe(event, callback) {
+                const listeners = this._listeners.get(event);
+                if (listeners) {
+                    const index = listeners.indexOf(callback);
+                    if (index > -1) listeners.splice(index, 1);
+                }
+            }
+
+            _notify(event, data) {
+                const listeners = this._listeners.get(event);
+                if (listeners) {
+                    listeners.forEach(callback => {
+                        try {
+                            callback(data);
+                        } catch (error) {
+                            console.error('Error in event listener:', error);
+                        }
+                    });
+                }
+            }
+
+            // Computed properties
+            get totalWorkers() { return this._workers.length; }
+
+            get totalAdvances() {
+                return this._workers.reduce((sum, w) => sum + (w.advance || 0), 0);
+            }
+
+            getTodayAttendance() {
+                const today = this._getTodayStr();
+                let present = 0;
+                let paid = 0;
+
+                this._workers.forEach(w => {
+                    const att = this.getAttendance(w.id, today);
+                    if (att && att.status !== 'absent') {
+                        present++;
+                        paid += att.payment || 0;
+                    }
+                });
+
+                return { present, paid };
+            }
+
+            getWorkerTotals(workerId) {
+                const worker = this.getWorker(workerId);
+                if (!worker) return { totalWage: 0, totalPaid: 0, netBalance: 0 };
+
+                const atts = this._attendance.get(workerId) || new Map();
+                let totalWage = 0;
+                let totalPaid = 0;
+
+                for (const [date, data] of atts) {
+                    const wage = this._calculateWageRate(workerId, date);
+                    totalWage += wage;
+                    totalPaid += data.payment || 0;
+                }
+
+                const netBalance = totalWage - totalPaid - (worker.advance || 0);
+
+                return { totalWage, totalPaid, netBalance };
+            }
+
+            _calculateWageRate(workerId, date) {
+                const worker = this.getWorker(workerId);
+                if (!worker) return 0;
+
+                const att = this.getAttendance(workerId, date);
+                if (!att || att.status === 'absent') return 0;
+                if (att.status === 'half') return Math.round((worker.daily_rate || 0) * 0.5);
+                return worker.daily_rate || 0;
+            }
+
+            _getTodayStr() {
+                return new Date().toISOString().split('T')[0];
+            }
+        }
+
+        // Create global state instance
+        const appState = new AppState();
 
         // ============================================================
         //  TOAST SYSTEM
         // ============================================================
-        function showToast(message, type = 'info', duration = 4000) {
-            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-                <span>${message}</span>
-                <button class="toast-close"><i class="fas fa-times"></i></button>
-            `;
-            toastContainer.appendChild(toast);
+        class ToastManager {
+            constructor(container) {
+                this.container = container;
+                this._toasts = [];
+            }
 
-            const closeBtn = toast.querySelector('.toast-close');
-            closeBtn.addEventListener('click', () => {
-                toast.classList.add('hiding');
-                setTimeout(() => toast.remove(), 300);
-            });
+            show(message, type = 'info', duration = CONFIG.TOAST_DURATION) {
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
 
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.classList.add('hiding');
-                    setTimeout(() => toast.remove(), 300);
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'polite');
+
+                toast.innerHTML = `
+                    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="toast-message">${this._escapeHtml(message)}</span>
+                    <button class="toast-close" aria-label="Close notification"><i class="fas fa-times"></i></button>
+                `;
+
+                this.container.appendChild(toast);
+                this._toasts.push(toast);
+
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => this._removeToast(toast));
+
+                if (duration > 0) {
+                    setTimeout(() => this._removeToast(toast), duration);
                 }
-            }, duration);
+
+                return toast;
+            }
+
+            success(message, duration = CONFIG.TOAST_DURATION) {
+                return this.show(message, 'success', duration);
+            }
+
+            error(message, duration = CONFIG.TOAST_DURATION) {
+                return this.show(message, 'error', duration);
+            }
+
+            warning(message, duration = CONFIG.TOAST_DURATION) {
+                return this.show(message, 'warning', duration);
+            }
+
+            info(message, duration = CONFIG.TOAST_DURATION) {
+                return this.show(message, 'info', duration);
+            }
+
+            _removeToast(toast) {
+                if (toast.classList.contains('hiding')) return;
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                        this._toasts = this._toasts.filter(t => t !== toast);
+                    }
+                }, 300);
+            }
+
+            _escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            clear() {
+                this._toasts.forEach(toast => this._removeToast(toast));
+                this._toasts = [];
+            }
         }
+
+        const toastManager = new ToastManager(document.getElementById('toastContainer'));
 
         // ============================================================
         //  LOADING OVERLAY
         // ============================================================
-        function showLoading(message = 'Loading...') {
-            loadingText.textContent = message;
-            loadingOverlay.style.display = 'flex';
-            loadingOverlay.classList.remove('show-timeout');
-            if (loadingTimeoutId) { clearTimeout(loadingTimeoutId);
-                loadingTimeoutId = null; }
-            loadingTimeoutId = setTimeout(() => {
-                if (loadingOverlay.style.display === 'flex') {
-                    loadingOverlay.classList.add('show-timeout');
-                }
-            }, 8000);
-        }
+        class LoadingManager {
+            constructor(overlay, textEl, timeoutEl, retryBtn) {
+                this.overlay = overlay;
+                this.textEl = textEl;
+                this.timeoutEl = timeoutEl;
+                this.retryBtn = retryBtn;
+                this._timeoutId = null;
+                this._isVisible = false;
 
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-            loadingOverlay.classList.remove('show-timeout');
-            if (loadingTimeoutId) { clearTimeout(loadingTimeoutId);
-                loadingTimeoutId = null; }
-        }
-
-        retryBtn.addEventListener('click', () => {
-            loadingOverlay.classList.remove('show-timeout');
-            loadingText.textContent = 'Retrying...';
-            window.location.reload();
-        });
-
-        // ============================================================
-        //  AUTHENTICATION
-        // ============================================================
-        async function loginWithSupabase(email, password) {
-            try {
-                showLoading('Signing in...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const loginPromise = supabaseClient.auth.signInWithPassword({ email, password });
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Login request timed out.')), 15000)
-                );
-                const result = await Promise.race([loginPromise, timeoutPromise]);
-                const { data, error } = result;
-                if (error) throw error;
-                return { success: true, user: data.user };
-            } catch (error) {
-                return { success: false, error: error.message };
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function logoutFromSupabase() {
-            try {
-                showLoading('Logging out...');
-                if (supabaseClient) await supabaseClient.auth.signOut();
-                return { success: true };
-            } catch (error) {
-                return { success: false };
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function checkAuth() {
-            try {
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
-                if (error) throw error;
-                if (session) return { success: true, user: session.user };
-                return { success: false };
-            } catch (error) {
-                return { success: false };
-            }
-        }
-
-        // ============================================================
-        //  DATA OPERATIONS
-        // ============================================================
-        async function fetchWithTimeout(promise, timeoutMs = 15000) {
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out.')), timeoutMs)
-            );
-            return Promise.race([promise, timeoutPromise]);
-        }
-
-        async function loadWorkersFromSupabase() {
-            try {
-                showLoading('Loading workers...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const result = await fetchWithTimeout(
-                    supabaseClient.from('workers').select('*').order('id'), 15000
-                );
-                const { data, error } = result;
-                if (error) throw error;
-                workers = data || [];
-                return workers;
-            } catch (error) {
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadAllAttendance() {
-            try {
-                showLoading('Loading attendance records...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const result = await fetchWithTimeout(
-                    supabaseClient.from('attendance').select('*'), 15000
-                );
-                const { data, error } = result;
-                if (error) throw error;
-                return data || [];
-            } catch (error) {
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadAttendanceForWorker(workerId) {
-            try {
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const result = await fetchWithTimeout(
-                    supabaseClient.from('attendance').select('*').eq('worker_id', workerId), 10000
-                );
-                const { data, error } = result;
-                if (error) throw error;
-                return data || [];
-            } catch (error) {
-                return [];
-            }
-        }
-
-        async function saveWorkerToSupabase(worker) {
-            try {
-                showLoading('Saving worker...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                let result;
-                if (worker.id) {
-                    const queryResult = await fetchWithTimeout(
-                        supabaseClient.from('workers').update({
-                            name: worker.name,
-                            role: worker.role,
-                            daily_rate: worker.daily_rate,
-                            advance: worker.advance || 0
-                        }).eq('id', worker.id).select(), 10000
-                    );
-                    const { data, error } = queryResult;
-                    if (error) throw error;
-                    result = data[0];
-                } else {
-                    const queryResult = await fetchWithTimeout(
-                        supabaseClient.from('workers').insert({
-                            name: worker.name,
-                            role: worker.role,
-                            daily_rate: worker.daily_rate,
-                            advance: worker.advance || 0
-                        }).select(), 10000
-                    );
-                    const { data, error } = queryResult;
-                    if (error) throw error;
-                    result = data[0];
-                }
-                return result;
-            } catch (error) {
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function deleteWorkerFromSupabase(id) {
-            try {
-                showLoading('Deleting worker...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const attResult = await fetchWithTimeout(
-                    supabaseClient.from('attendance').delete().eq('worker_id', id), 10000
-                );
-                if (attResult.error) throw attResult.error;
-                const result = await fetchWithTimeout(
-                    supabaseClient.from('workers').delete().eq('id', id), 10000
-                );
-                if (result.error) throw result.error;
-                return { success: true };
-            } catch (error) {
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function saveAttendanceToSupabase(attendanceData) {
-            try {
-                showLoading('Saving attendance...');
-                if (!supabaseClient) throw new Error('Supabase client not initialized');
-                const result = await fetchWithTimeout(
-                    supabaseClient.from('attendance').upsert(attendanceData, {
-                        onConflict: 'worker_id,date',
-                        ignoreDuplicates: false
-                    }).select(), 10000
-                );
-                const { data, error } = result;
-                if (error) throw error;
-                return data;
-            } catch (error) {
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // ============================================================
-        //  CALCULATION FUNCTIONS - CORRECT LOGIC
-        // ============================================================
-
-        // Get wage rate for a specific day based on status
-        function getWageRate(workerId, date) {
-            const worker = workers.find(w => w.id === workerId);
-            if (!worker) return 0;
-            const entry = attendanceMap[workerId]?.[date];
-            if (!entry || entry.status === 'absent') return 0;
-            if (entry.status === 'half') return Math.round((worker.daily_rate || 0) * 0.5);
-            return worker.daily_rate || 0;
-        }
-
-        // Calculate TOTAL WAGE (sum of all wage rates)
-        function calculateTotalWage(workerId) {
-            const atts = attendanceMap[workerId] || {};
-            let total = 0;
-            for (const date in atts) {
-                total += getWageRate(workerId, date);
-            }
-            return total;
-        }
-
-        // Calculate TOTAL PAID (sum of all payments)
-        function calculateTotalPaid(workerId) {
-            const atts = attendanceMap[workerId] || {};
-            let total = 0;
-            for (const date in atts) {
-                total += atts[date].payment || 0;
-            }
-            return total;
-        }
-
-        // Calculate NET BALANCE = Total Wage - Total Paid - Advance
-        function getNetBalance(workerId) {
-            const worker = workers.find(w => w.id === workerId);
-            if (!worker) return 0;
-            const totalWage = calculateTotalWage(workerId);
-            const totalPaid = calculateTotalPaid(workerId);
-            const advance = worker.advance || 0;
-            return totalWage - totalPaid - advance;
-        }
-
-        // Get day balance for a specific date
-        function getDayBalance(workerId, date) {
-            const wage = getWageRate(workerId, date);
-            const paid = attendanceMap[workerId]?.[date]?.payment || 0;
-            return wage - paid;
-        }
-
-        // ============================================================
-        //  RENDER FUNCTIONS
-        // ============================================================
-        function renderManageTable() {
-            let html = '';
-            workers.forEach(w => {
-                const netBalance = getNetBalance(w.id);
-                html += `
-                    <tr>
-                        <td><span class="worker-name"><i class="fas fa-user"></i> ${w.name}</span></td>
-                        <td><span class="role-badge">${w.role}</span></td>
-                        <td>₹ ${w.daily_rate}</td>
-                        <td>₹ ${w.advance || 0}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="edit-btn" data-id="${w.id}"><i class="fas fa-pen"></i> Edit</button>
-                                <button class="delete-btn" data-id="${w.id}"><i class="fas fa-trash"></i> Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            manageTbody.innerHTML = html;
-
-            manageTbody.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.dataset.id);
-                    openEditModal(id);
+                this.retryBtn.addEventListener('click', () => {
+                    this.hide();
+                    window.location.reload();
                 });
-            });
-            manageTbody.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.dataset.id);
-                    if (confirm('Delete this worker? This will also remove their history.')) {
-                        deleteWorker(id);
+            }
+
+            show(message = 'Loading...') {
+                this.textEl.textContent = message;
+                this.overlay.classList.add('active');
+                this.overlay.classList.remove('show-timeout');
+                this._isVisible = true;
+
+                if (this._timeoutId) {
+                    clearTimeout(this._timeoutId);
+                }
+
+                this._timeoutId = setTimeout(() => {
+                    if (this._isVisible) {
+                        this.overlay.classList.add('show-timeout');
                     }
-                });
-            });
-        }
+                }, 8000);
 
-        function renderDailyTable() {
-            const total = workers.length;
-            const todayStr = getTodayStr();
-            let presentCount = 0;
-            let totalPaidToday = 0;
-            let totalAdvance = 0;
-
-            workers.forEach(w => {
-                totalAdvance += w.advance || 0;
-                const att = attendanceMap[w.id]?.[todayStr];
-                if (att && att.status !== 'absent') {
-                    presentCount++;
-                    totalPaidToday += att.payment || 0;
-                }
-            });
-
-            totalWorkersEl.textContent = total;
-            presentTodayEl.textContent = presentCount;
-            paidTodayEl.textContent = `₹ ${totalPaidToday.toLocaleString()}`;
-            totalAdvanceEl.textContent = `₹ ${totalAdvance.toLocaleString()}`;
-
-            const now = new Date();
-            todayDateEl.textContent = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-
-            let html = '';
-            workers.forEach(w => {
-                const todayStr2 = getTodayStr();
-                const att = attendanceMap[w.id]?.[todayStr2] || { status: 'present', payment: 0 };
-                const status = att.status || 'present';
-                const paid = att.payment || 0;
-                const wageRate = getWageRate(w.id, todayStr2);
-                const dayBalance = wageRate - paid;
-                const totalWage = calculateTotalWage(w.id);
-                const totalPaid = calculateTotalPaid(w.id);
-                const netBalance = totalWage - totalPaid - (w.advance || 0);
-
-                let dayBalClass = dayBalance > 0 ? 'balance-positive' : (dayBalance < 0 ? 'balance-negative' :
-                    'balance-zero');
-                let netBalClass = netBalance > 0 ? 'balance-positive' : (netBalance < 0 ? 'balance-negative' :
-                    'balance-zero');
-
-                html += `
-                    <tr>
-                        <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${w.name}</span></td>
-                        <td>
-                            <div class="attendance-toggle">
-                                <button data-id="${w.id}" data-val="present" class="${status === 'present' ? 'active' : ''}">P</button>
-                                <button data-id="${w.id}" data-val="absent" class="${status === 'absent' ? 'active' : ''}">A</button>
-                                <button data-id="${w.id}" data-val="half" class="${status === 'half' ? 'active' : ''}">½</button>
-                            </div>
-                        </td>
-                        <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
-                        <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" /></td>
-                        <td><span class="balance-amount ${dayBalClass}">${dayBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(dayBalance)}</span></td>
-                        <td><span class="balance-amount balance-zero">₹ ${totalWage}</span></td>
-                        <td><span class="balance-amount balance-zero">₹ ${totalPaid}</span></td>
-                        <td><span class="balance-amount ${netBalClass}">${netBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(netBalance)}</span></td>
-                        <td><button class="profile-btn" data-id="${w.id}"><i class="fas fa-address-card"></i> View</button></td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-
-            // Attendance toggle handlers
-            tbody.querySelectorAll('.attendance-toggle button').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
-                    e.stopPropagation();
-                    const id = parseInt(this.dataset.id);
-                    const status = this.dataset.val;
-                    const todayStr2 = getTodayStr();
-                    const worker = workers.find(w => w.id === id);
-                    if (!worker) return;
-
-                    if (!attendanceMap[id]) attendanceMap[id] = {};
-                    if (!attendanceMap[id][todayStr2]) {
-                        attendanceMap[id][todayStr2] = { status: 'present', payment: 0, remark: '' };
-                    }
-                    attendanceMap[id][todayStr2].status = status;
-
-                    if (status === 'absent') {
-                        attendanceMap[id][todayStr2].payment = 0;
-                    } else if (status === 'half') {
-                        attendanceMap[id][todayStr2].payment = Math.round((worker.daily_rate || 0) * 0.5);
-                    } else {
-                        attendanceMap[id][todayStr2].payment = worker.daily_rate || 0;
-                    }
-
-                    try {
-                        await saveAttendanceToSupabase([{
-                            worker_id: id,
-                            date: todayStr2,
-                            status: attendanceMap[id][todayStr2].status,
-                            payment: attendanceMap[id][todayStr2].payment,
-                            remark: attendanceMap[id][todayStr2].remark || ''
-                        }]);
-                        await refreshAttendanceData(id);
-                        fullRender();
-                        showToast(`Attendance marked as ${status} for ${worker.name}`, 'success');
-                    } catch (error) {
-                        showToast('Failed to save attendance: ' + error.message, 'error');
-                    }
-                });
-            });
-
-            // Payment input handlers
-            tbody.querySelectorAll('.paid-input').forEach(inp => {
-                inp.addEventListener('change', async function() {
-                    const id = parseInt(this.dataset.id);
-                    let val = parseFloat(this.value);
-                    if (isNaN(val) || val < 0) val = 0;
-                    const todayStr2 = getTodayStr();
-                    const worker = workers.find(w => w.id === id);
-                    if (!worker) return;
-
-                    if (!attendanceMap[id]) attendanceMap[id] = {};
-                    if (!attendanceMap[id][todayStr2]) {
-                        attendanceMap[id][todayStr2] = { status: 'present', payment: val, remark: '' };
-                    }
-                    attendanceMap[id][todayStr2].payment = val;
-
-                    try {
-                        await saveAttendanceToSupabase([{
-                            worker_id: id,
-                            date: todayStr2,
-                            status: attendanceMap[id][todayStr2].status || 'present',
-                            payment: val,
-                            remark: attendanceMap[id][todayStr2].remark || ''
-                        }]);
-                        await refreshAttendanceData(id);
-                        fullRender();
-                        showToast(`Payment updated for ${worker.name}`, 'info');
-                    } catch (error) {
-                        showToast('Failed to save payment: ' + error.message, 'error');
-                    }
-                });
-            });
-
-            // Profile button handlers
-            tbody.querySelectorAll('.profile-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.dataset.id);
-                    currentMonth = new Date().getMonth();
-                    currentYear = new Date().getFullYear();
-                    openProfilePage(id);
-                });
-            });
-        }
-
-        async function refreshAttendanceData(workerId) {
-            try {
-                const attData = await loadAttendanceForWorker(workerId);
-                if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-                attData.forEach(att => {
-                    attendanceMap[workerId][att.date] = {
-                        status: att.status,
-                        payment: att.payment || 0,
-                        remark: att.remark || ''
-                    };
-                });
-            } catch (error) {
-                console.error('Error refreshing attendance:', error);
-            }
-        }
-
-        function fullRender() {
-            renderManageTable();
-            renderDailyTable();
-        }
-
-        // ============================================================
-        //  CRUD OPERATIONS
-        // ============================================================
-        async function deleteWorker(id) {
-            try {
-                await deleteWorkerFromSupabase(id);
-                workers = workers.filter(w => w.id !== id);
-                delete attendanceMap[id];
-                fullRender();
-                showToast('Worker deleted successfully', 'success');
-            } catch (error) {
-                showToast('Failed to delete worker: ' + error.message, 'error');
-            }
-        }
-
-        function openEditModal(id) {
-            const w = workers.find(w => w.id === id);
-            if (!w) return;
-            editingWorkerId = id;
-            modalTitle.innerHTML = '<i class="fas fa-user-pen"></i> Edit Worker';
-            modalName.value = w.name;
-            modalRole.value = w.role;
-            modalDailyRate.value = w.daily_rate;
-            modalAdvance.value = w.advance || 0;
-            workerModal.style.display = 'flex';
-        }
-
-        function openAddModal() {
-            editingWorkerId = null;
-            modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Add Worker';
-            modalName.value = '';
-            modalRole.value = '';
-            modalDailyRate.value = '';
-            modalAdvance.value = '0';
-            workerModal.style.display = 'flex';
-        }
-
-        async function saveWorker() {
-            const name = modalName.value.trim();
-            const role = modalRole.value.trim();
-            const daily_rate = parseFloat(modalDailyRate.value);
-            const advance = parseFloat(modalAdvance.value) || 0;
-
-            if (!name || !role || isNaN(daily_rate) || daily_rate <= 0) {
-                showToast('Please fill all fields correctly.', 'warning');
-                return;
+                return this;
             }
 
-            try {
-                const workerData = { name, role, daily_rate, advance };
-                if (editingWorkerId !== null) {
-                    workerData.id = editingWorkerId;
+            hide() {
+                this.overlay.classList.remove('active');
+                this.overlay.classList.remove('show-timeout');
+                this._isVisible = false;
+
+                if (this._timeoutId) {
+                    clearTimeout(this._timeoutId);
+                    this._timeoutId = null;
                 }
 
-                const saved = await saveWorkerToSupabase(workerData);
+                return this;
+            }
 
-                if (editingWorkerId !== null) {
-                    const idx = workers.findIndex(w => w.id === editingWorkerId);
-                    if (idx !== -1) workers[idx] = saved;
-                    showToast('Worker updated successfully', 'success');
-                } else {
-                    workers.push(saved);
-                    attendanceMap[saved.id] = {};
-                    showToast(`Worker ${saved.name} added successfully`, 'success');
-                }
-
-                workerModal.style.display = 'none';
-                fullRender();
-            } catch (error) {
-                showToast('Failed to save worker: ' + error.message, 'error');
+            updateMessage(message) {
+                this.textEl.textContent = message;
+                return this;
             }
         }
 
-        // ============================================================
-        //  PROFILE PAGE
-        // ============================================================
-        async function openProfilePage(workerId) {
-            const w = workers.find(w => w.id === workerId);
-            if (!w) return;
-            currentProfileWorkerId = workerId;
-            profileWorkerName.textContent = w.name;
-            profileWorkerRole.textContent = w.role;
+        const loadingManager = new LoadingManager(
+            document.getElementById('loadingOverlay'),
+            document.getElementById('loadingText'),
+            null,
+            document.getElementById('retryBtn')
+        );
 
-            try {
-                const attData = await loadAttendanceForWorker(workerId);
-                if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-                attData.forEach(att => {
-                    attendanceMap[workerId][att.date] = {
-                        status: att.status,
-                        payment: att.payment || 0,
-                        remark: att.remark || ''
-                    };
-                });
-            } catch (error) {
-                console.error('Error loading attendance for profile:', error);
+        // ============================================================
+        //  API SERVICE
+        // ============================================================
+        class ApiService {
+            constructor(client) {
+                this.client = client;
+                this._retryCount = 0;
             }
 
-            updateProfileSummary(workerId);
-            renderCalendar(workerId);
-            profileOverlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+            async _request(operation, timeout = CONFIG.REQUEST_TIMEOUT) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-        function updateProfileSummary(workerId) {
-            const w = workers.find(w => w.id === workerId);
-            if (!w) return;
-
-            const totalWage = calculateTotalWage(workerId);
-            const totalPaid = calculateTotalPaid(workerId);
-            const adv = w.advance || 0;
-            const netBalance = totalWage - totalPaid - adv;
-
-            profileTotalWage.textContent = `₹ ${totalWage.toLocaleString()}`;
-            profileTotalPaid.textContent = `₹ ${totalPaid.toLocaleString()}`;
-            profileAdvance.textContent = `₹ ${adv.toLocaleString()}`;
-            profileBalance.textContent = `₹ ${netBalance.toLocaleString()}`;
-            profileBalance.style.color = netBalance >= 0 ? '#4caf50' : '#f44336';
-        }
-
-        function renderCalendar(workerId) {
-            const w = workers.find(w => w.id === workerId);
-            if (!w) return;
-
-            const dateObj = new Date(currentYear, currentMonth, 1);
-            monthLabel.textContent = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-            const history = attendanceMap[workerId] || {};
-
-            let gridHtml = '';
-            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            weekdays.forEach(day => {
-                gridHtml += `<div class="day-header">${day}</div>`;
-            });
-
-            for (let i = 0; i < firstDay; i++) {
-                gridHtml += `<div class="empty-day"></div>`;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr =
-                    `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const entry = history[dateStr] || { status: 'present', payment: 0, remark: '' };
-                const status = entry.status || 'present';
-                const payment = entry.payment || 0;
-                const remark = entry.remark || '';
-
-                gridHtml += `
-                    <div class="day-block" data-date="${dateStr}">
-                        <div class="day-label">
-                            <span>${day}</span>
-                            <span class="status-badge">${status}</span>
-                        </div>
-                        <div class="day-actions">
-                            <button class="${status === 'present' ? 'active-status' : ''}" data-status="present">P</button>
-                            <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent">A</button>
-                            <button class="${status === 'half' ? 'active-status' : ''}" data-status="half">½</button>
-                        </div>
-                        <div class="day-payment">
-                            <i class="fas fa-coins" style="color:#e8b86d;"></i>
-                            <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" />
-                        </div>
-                        <div class="day-remark">
-                            <input type="text" class="day-remark-input" value="${remark}" placeholder="remark" />
-                        </div>
-                    </div>
-                `;
-            }
-
-            calendarGrid.innerHTML = gridHtml;
-
-            document.querySelectorAll('.day-block').forEach(block => {
-                const date = block.dataset.date;
-                if (!date) return;
-
-                block.querySelectorAll('.day-actions button').forEach(btn => {
-                    btn.addEventListener('click', async function() {
-                        const newStatus = this.dataset.status;
-                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-                        if (!attendanceMap[workerId][date]) {
-                            attendanceMap[workerId][date] = { status: 'present', payment: 0,
-                                remark: '' };
-                        }
-                        attendanceMap[workerId][date].status = newStatus;
-
-                        const ww = workers.find(w => w.id === workerId);
-                        if (newStatus === 'absent') {
-                            attendanceMap[workerId][date].payment = 0;
-                        } else if (newStatus === 'half') {
-                            attendanceMap[workerId][date].payment = Math.round((ww?.daily_rate ||
-                                0) * 0.5);
-                        } else {
-                            attendanceMap[workerId][date].payment = ww?.daily_rate || 0;
-                        }
-
-                        try {
-                            await saveAttendanceToSupabase([{
-                                worker_id: workerId,
-                                date: date,
-                                status: newStatus,
-                                payment: attendanceMap[workerId][date].payment || 0,
-                                remark: attendanceMap[workerId][date].remark || ''
-                            }]);
-
-                            const todayStr2 = getTodayStr();
-                            if (date === todayStr2) {
-                                fullRender();
-                            }
-                            updateProfileSummary(workerId);
-                            renderCalendar(workerId);
-                            showToast(`Attendance updated for ${date}`, 'success');
-                        } catch (error) {
-                            showToast('Failed to save attendance: ' + error.message, 'error');
-                        }
-                    });
-                });
-
-                const paymentInput = block.querySelector('.day-payment-input');
-                if (paymentInput) {
-                    paymentInput.addEventListener('change', async function() {
-                        let val = parseFloat(this.value);
-                        if (isNaN(val) || val < 0) val = 0;
-                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-                        if (!attendanceMap[workerId][date]) {
-                            attendanceMap[workerId][date] = { status: 'present', payment: val,
-                                remark: '' };
-                        } else {
-                            attendanceMap[workerId][date].payment = val;
-                        }
-
-                        try {
-                            await saveAttendanceToSupabase([{
-                                worker_id: workerId,
-                                date: date,
-                                status: attendanceMap[workerId][date].status || 'present',
-                                payment: val,
-                                remark: attendanceMap[workerId][date].remark || ''
-                            }]);
-
-                            const todayStr2 = getTodayStr();
-                            if (date === todayStr2) {
-                                fullRender();
-                            }
-                            updateProfileSummary(workerId);
-                            renderCalendar(workerId);
-                        } catch (error) {
-                            showToast('Failed to save payment: ' + error.message, 'error');
-                        }
-                    });
-                }
-
-                const remarkInput = block.querySelector('.day-remark-input');
-                if (remarkInput) {
-                    remarkInput.addEventListener('change', async function() {
-                        const remark = this.value;
-                        if (!attendanceMap[workerId]) attendanceMap[workerId] = {};
-                        if (!attendanceMap[workerId][date]) {
-                            attendanceMap[workerId][date] = { status: 'present', payment: 0,
-                                remark: remark };
-                        } else {
-                            attendanceMap[workerId][date].remark = remark;
-                        }
-
-                        try {
-                            await saveAttendanceToSupabase([{
-                                worker_id: workerId,
-                                date: date,
-                                status: attendanceMap[workerId][date].status || 'present',
-                                payment: attendanceMap[workerId][date].payment || 0,
-                                remark: remark
-                            }]);
-                            showToast('Remark saved successfully', 'success');
-                        } catch (error) {
-                            showToast('Failed to save remark: ' + error.message, 'error');
-                        }
-                    });
-                }
-            });
-        }
-
-        function closeProfilePage() {
-            profileOverlay.style.display = 'none';
-            currentProfileWorkerId = null;
-            document.body.style.overflow = '';
-        }
-
-        function changeMonth(delta) {
-            currentMonth += delta;
-            if (currentMonth < 0) { currentMonth = 11;
-                currentYear--; }
-            if (currentMonth > 11) { currentMonth = 0;
-                currentYear++; }
-            if (currentProfileWorkerId !== null) {
-                renderCalendar(currentProfileWorkerId);
-            }
-        }
-
-        // ============================================================
-        //  UTILITY FUNCTIONS
-        // ============================================================
-        function getTodayStr() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        // ============================================================
-        //  AUTH HANDLERS
-        // ============================================================
-        async function handleLogin() {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!email || !password) {
-                errorText.textContent = 'Please enter email and password';
-                loginError.style.display = 'flex';
-                return;
-            }
-
-            if (!supabaseClient) {
-                errorText.textContent = 'Supabase client not initialized. Please refresh.';
-                loginError.style.display = 'flex';
-                return;
-            }
-
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
-            loginError.style.display = 'none';
-
-            const result = await loginWithSupabase(email, password);
-
-            loginBtn.classList.remove('loading');
-            loginBtn.disabled = false;
-
-            if (result.success) {
-                loginError.style.display = 'none';
-                loginScreen.style.display = 'none';
-                dashboardScreen.style.display = 'block';
-                userEmailSpan.textContent = result.user.email;
-                await loadData();
-                fullRender();
-                showToast('Welcome back!', 'success');
-            } else {
-                errorText.textContent = result.error || 'Invalid credentials';
-                loginError.style.display = 'flex';
-            }
-        }
-
-        async function handleLogout() {
-            await logoutFromSupabase();
-            dashboardScreen.style.display = 'none';
-            loginScreen.style.display = 'flex';
-            loginError.style.display = 'none';
-            emailInput.value = 'admin@jaiswal.com';
-            passwordInput.value = 'Jaiswal@123';
-            workers = [];
-            attendanceMap = {};
-            fullRender();
-            showToast('Logged out successfully', 'info');
-        }
-
-        // ============================================================
-        //  LOAD DATA
-        // ============================================================
-        async function loadData() {
-            try {
-                workers = await loadWorkersFromSupabase();
-                const allAtt = await loadAllAttendance();
-                attendanceMap = {};
-                allAtt.forEach(att => {
-                    if (!attendanceMap[att.worker_id]) attendanceMap[att.worker_id] = {};
-                    attendanceMap[att.worker_id][att.date] = {
-                        status: att.status,
-                        payment: att.payment || 0,
-                        remark: att.remark || ''
-                    };
-                });
-            } catch (error) {
-                console.error('❌ Error loading data:', error);
-                showToast('Failed to load data: ' + error.message, 'error');
-                throw error;
-            }
-        }
-
-        // ============================================================
-        //  INIT
-        // ============================================================
-        async function init() {
-            console.log('🚀 Initializing Jaiswal Workers Management System...');
-
-            if (!supabaseClient) {
-                console.error('❌ Supabase client failed to initialize');
-                showToast('Failed to initialize Supabase. Please refresh.', 'error');
-                return;
-            }
-
-            const auth = await checkAuth();
-            if (auth.success) {
-                loginScreen.style.display = 'none';
-                dashboardScreen.style.display = 'block';
-                userEmailSpan.textContent = auth.user.email;
                 try {
-                    await loadData();
-                    fullRender();
+                    const result = await operation(controller.signal);
+                    clearTimeout(timeoutId);
+                    this._retryCount = 0;
+                    return result;
                 } catch (error) {
-                    loginScreen.style.display = 'flex';
-                    dashboardScreen.style.display = 'none';
-                    errorText.textContent = 'Failed to load data. Please try again.';
-                    loginError.style.display = 'flex';
+                    clearTimeout(timeoutId);
+
+                    if (controller.signal.aborted) {
+                        throw new Error('Request timed out. Please check your connection.');
+                    }
+
+                    // Retry logic
+                    if (this._retryCount < CONFIG.MAX_RETRIES) {
+                        this._retryCount++;
+                        const delay = CONFIG.RETRY_DELAY * this._retryCount;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return this._request(operation, timeout);
+                    }
+
+                    throw error;
                 }
-            } else {
-                loginScreen.style.display = 'flex';
-                dashboardScreen.style.display = 'none';
-                loginError.style.display = 'none';
-                emailInput.value = 'admin@jaiswal.com';
-                passwordInput.value = 'Jaiswal@123';
             }
 
-            loginBtn.addEventListener('click', handleLogin);
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && loginScreen.style.display !== 'none') handleLogin();
-            });
-            logoutBtn.addEventListener('click', handleLogout);
+            async login(email, password) {
+                return this._request(async (signal) => {
+                    const result = await this.client.auth.signInWithPassword({ email, password });
+                    if (result.error) throw result.error;
+                    return result.data;
+                });
+            }
 
-            addWorkerBtn.addEventListener('click', openAddModal);
-            modalCancelBtn.addEventListener('click', () => { workerModal.style.display = 'none'; });
-            modalSaveBtn.addEventListener('click', saveWorker);
-            workerModal.addEventListener('click', (e) => { if (e.target === workerModal) workerModal.style.display =
-                    'none'; });
+            async logout() {
+                return this._request(async () => {
+                    const result = await this.client.auth.signOut();
+                    if (result.error) throw result.error;
+                    return result.data;
+                });
+            }
 
-            profileCloseBtn.addEventListener('click', closeProfilePage);
-            profileOverlay.addEventListener('click', (e) => { if (e.target === profileOverlay) closeProfilePage(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProfilePage(); });
+            async getSession() {
+                return this._request(async () => {
+                    const result = await this.client.auth.getSession();
+                    if (result.error) throw result.error;
+                    return result.data;
+                });
+            }
 
-            prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-            nextMonthBtn.addEventListener('click', () => changeMonth(1));
+            async getWorkers() {
+                return this._request(async () => {
+                    const result = await this.client
+                        .from('workers')
+                        .select('*')
+                        .order('name');
+                    if (result.error) throw result.error;
+                    return result.data || [];
+                });
+            }
 
-            // Handle orientation change and resize
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    // Re-render calendar if profile is open
-                    if (currentProfileWorkerId !== null) {
-                        renderCalendar(currentProfileWorkerId);
+            async saveWorker(worker) {
+                return this._request(async () => {
+                    let result;
+                    if (worker.id) {
+                        result = await this.client
+                            .from('workers')
+                            .update({
+                                name: worker.name,
+                                role: worker.role,
+                                daily_rate: worker.daily_rate,
+                                advance: worker.advance || 0,
+                                updated_at: new Date().toISOString(),
+                            })
+                            .eq('id', worker.id)
+                            .select();
+                    } else {
+                        result = await this.client
+                            .from('workers')
+                            .insert({
+                                name: worker.name,
+                                role: worker.role,
+                                daily_rate: worker.daily_rate,
+                                advance: worker.advance || 0,
+                            })
+                            .select();
                     }
-                }, 250);
-            });
+
+                    if (result.error) throw result.error;
+                    return result.data[0];
+                });
+            }
+
+            async deleteWorker(id) {
+                return this._request(async () => {
+                    // Delete attendance first (cascade is not guaranteed in all setups)
+                    const attResult = await this.client
+                        .from('attendance')
+                        .delete()
+                        .eq('worker_id', id);
+
+                    if (attResult.error) throw attResult.error;
+
+                    const result = await this.client
+                        .from('workers')
+                        .delete()
+                        .eq('id', id);
+
+                    if (result.error) throw result.error;
+                    return { success: true };
+                });
+            }
+
+            async getAttendance(workerId) {
+                return this._request(async () => {
+                    let query = this.client.from('attendance').select('*');
+                    if (workerId) {
+                        query = query.eq('worker_id', workerId);
+                    }
+                    const result = await query;
+                    if (result.error) throw result.error;
+                    return result.data || [];
+                });
+            }
+
+            async saveAttendance(attendanceData) {
+                return this._request(async () => {
+                    const result = await this.client
+                        .from('attendance')
+                        .upsert(attendanceData, {
+                            onConflict: 'worker_id,date',
+                            ignoreDuplicates: false,
+                        })
+                        .select();
+
+                    if (result.error) throw result.error;
+                    return result.data || [];
+                });
+            }
+
+            async getWorkerWithAttendance(workerId) {
+                const [worker, attendance] = await Promise.all([
+                    this.getWorkers().then(workers => workers.find(w => w.id === workerId)),
+                    this.getAttendance(workerId),
+                ]);
+
+                if (!worker) throw new Error('Worker not found');
+
+                return { worker, attendance };
+            }
         }
 
-        // Initialize the app when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
+        const apiService = new ApiService(supabaseClient);
+
+        // ============================================================
+        //  APPLICATION CONTROLLER
+        // ============================================================
+        class AppController {
+            constructor() {
+                this._initialized = false;
+                this._isProcessing = false;
+                this._domCache = {};
+                this._bindEvents();
+                this._setupStateListeners();
+            }
+
+            _getDom(id) {
+                if (!this._domCache[id]) {
+                    this._domCache[id] = document.getElementById(id);
+                }
+                return this._domCache[id];
+            }
+
+            _bindEvents() {
+                // Login
+                this._getDom('loginBtn').addEventListener('click', () => this._handleLogin());
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && this._getDom('loginScreen').style.display !== 'none') {
+                        this._handleLogin();
+                    }
+                });
+
+                // Logout
+                this._getDom('logoutBtn').addEventListener('click', () => this._handleLogout());
+
+                // Worker management
+                this._getDom('addWorkerBtn').addEventListener('click', () => this._openAddModal());
+                this._getDom('modalCancelBtn').addEventListener('click', () => this._closeModal());
+                this._getDom('modalSaveBtn').addEventListener('click', () => this._saveWorker());
+                this._getDom('workerModal').addEventListener('click', (e) => {
+                    if (e.target === this._getDom('workerModal')) this._closeModal();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this._closeModal();
+                });
+
+                // Profile
+                this._getDom('profileCloseBtn').addEventListener('click', () => this._closeProfile());
+                this._getDom('profilePageOverlay').addEventListener('click', (e) => {
+                    if (e.target === this._getDom('profilePageOverlay')) this._closeProfile();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this._closeProfile();
+                });
+
+                // Month navigation
+                this._getDom('prevMonthBtn').addEventListener('click', () => this._changeMonth(-1));
+                this._getDom('nextMonthBtn').addEventListener('click', () => this._changeMonth(1));
+
+                // Retry button
+                document.getElementById('retryBtn').addEventListener('click', () => {
+                    loadingManager.hide();
+                    this._initApp();
+                });
+            }
+
+            _setupStateListeners() {
+                appState.subscribe('workers-updated', () => {
+                    this._renderManageTable();
+                    this._renderDailyTable();
+                    this._updateStats();
+                });
+
+                appState.subscribe('attendance-bulk-updated', () => {
+                    this._renderDailyTable();
+                    this._updateStats();
+                    if (appState.uiState.selectedWorkerId) {
+                        this._renderCalendar(appState.uiState.selectedWorkerId);
+                        this._updateProfileSummary(appState.uiState.selectedWorkerId);
+                    }
+                });
+
+                appState.subscribe('attendance-updated', (data) => {
+                    this._renderDailyTable();
+                    this._updateStats();
+                    if (data && appState.uiState.selectedWorkerId === data.workerId) {
+                        this._renderCalendar(data.workerId);
+                        this._updateProfileSummary(data.workerId);
+                    }
+                });
+
+                appState.subscribe('auth-change', () => {
+                    const isAuth = appState.isAuthenticated;
+                    this._getDom('loginScreen').style.display = isAuth ? 'none' : 'flex';
+                    this._getDom('dashboardScreen').style.display = isAuth ? 'block' : 'none';
+                    if (isAuth && this._getDom('userEmail')) {
+                        this._getDom('userEmail').textContent = appState.currentUser?.email || 'User';
+                    }
+                });
+            }
+
+            // ============================================================
+            //  INITIALIZATION
+            // ============================================================
+            async _initApp() {
+                if (this._initialized) return;
+
+                loadingManager.show('Initializing application...');
+
+                try {
+                    if (!supabaseClient) {
+                        throw new Error('Supabase client not available');
+                    }
+
+                    // Check authentication
+                    const session = await apiService.getSession();
+                    if (session?.session) {
+                        appState.currentUser = session.session.user;
+                        await this._loadData();
+                        appState.subscribe('workers-updated', () => this._updateTodayDate());
+                        this._updateTodayDate();
+                        toastManager.success('Welcome back!');
+                    } else {
+                        appState.currentUser = null;
+                        this._getDom('loginScreen').style.display = 'flex';
+                        this._getDom('dashboardScreen').style.display = 'none';
+                    }
+
+                    this._initialized = true;
+                } catch (error) {
+                    console.error('❌ Initialization error:', error);
+                    toastManager.error('Failed to initialize application: ' + error.message);
+                } finally {
+                    loadingManager.hide();
+                }
+            }
+
+            async _loadData() {
+                loadingManager.show('Loading data...');
+
+                try {
+                    // Load workers
+                    const workers = await apiService.getWorkers();
+                    appState.workers = workers;
+
+                    // Load attendance
+                    if (workers.length > 0) {
+                        const allAttendance = await apiService.getAttendance();
+                        appState.setBulkAttendance(allAttendance);
+                    }
+
+                    this._renderAll();
+                } catch (error) {
+                    console.error('❌ Failed to load data:', error);
+                    toastManager.error('Failed to load data: ' + error.message);
+                    throw error;
+                } finally {
+                    loadingManager.hide();
+                }
+            }
+
+            // ============================================================
+            //  AUTHENTICATION
+            // ============================================================
+            async _handleLogin() {
+                if (this._isProcessing) return;
+
+                const email = this._getDom('emailInput').value.trim();
+                const password = this._getDom('passwordInput').value.trim();
+
+                if (!email || !password) {
+                    this._showLoginError('Please enter email and password');
+                    return;
+                }
+
+                if (!this._isValidEmail(email)) {
+                    this._showLoginError('Please enter a valid email address');
+                    return;
+                }
+
+                this._isProcessing = true;
+                const loginBtn = this._getDom('loginBtn');
+                loginBtn.classList.add('loading');
+                loginBtn.disabled = true;
+                this._hideLoginError();
+
+                try {
+                    const result = await apiService.login(email, password);
+                    appState.currentUser = result.user;
+                    await this._loadData();
+                    this._updateTodayDate();
+                    toastManager.success('Welcome back, ' + (result.user.email || 'User') + '!');
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this._showLoginError(error.message || 'Invalid credentials. Please try again.');
+                } finally {
+                    this._isProcessing = false;
+                    loginBtn.classList.remove('loading');
+                    loginBtn.disabled = false;
+                }
+            }
+
+            async _handleLogout() {
+                if (this._isProcessing) return;
+
+                this._isProcessing = true;
+                loadingManager.show('Logging out...');
+
+                try {
+                    await apiService.logout();
+                    appState.currentUser = null;
+                    appState.workers = [];
+                    appState._attendance.clear();
+                    this._renderAll();
+                    toastManager.info('You have been logged out.');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    toastManager.error('Failed to logout: ' + error.message);
+                } finally {
+                    this._isProcessing = false;
+                    loadingManager.hide();
+                }
+            }
+
+            _showLoginError(message) {
+                const errorEl = this._getDom('loginError');
+                this._getDom('errorText').textContent = message;
+                errorEl.style.display = 'flex';
+            }
+
+            _hideLoginError() {
+                this._getDom('loginError').style.display = 'none';
+            }
+
+            _isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            // ============================================================
+            //  RENDER FUNCTIONS
+            // ============================================================
+            _renderAll() {
+                this._renderManageTable();
+                this._renderDailyTable();
+                this._updateStats();
+                this._updateTodayDate();
+            }
+
+            _renderManageTable() {
+                const tbody = this._getDom('manageTableBody');
+                const workers = appState.workers;
+
+                if (workers.length === 0) {
+                    tbody.innerHTML =
+                        `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No workers found. Click "Add Worker" to get started!</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                workers.forEach(w => {
+                    html += `
+                        <tr>
+                            <td><span class="worker-name"><i class="fas fa-user"></i> ${this._escapeHtml(w.name)}</span></td>
+                            <td><span class="role-badge">${this._escapeHtml(w.role)}</span></td>
+                            <td>₹ ${w.daily_rate}</td>
+                            <td>₹ ${w.advance || 0}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="edit-btn" data-id="${w.id}" aria-label="Edit worker"><i class="fas fa-pen"></i> Edit</button>
+                                    <button class="delete-btn" data-id="${w.id}" aria-label="Delete worker"><i class="fas fa-trash"></i> Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+
+                // Bind events
+                tbody.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        this._openEditModal(id);
+                    });
+                });
+
+                tbody.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        this._deleteWorker(id);
+                    });
+                });
+            }
+
+            _renderDailyTable() {
+                const tbody = this._getDom('workerTableBody');
+                const workers = appState.workers;
+                const today = this._getTodayStr();
+
+                if (workers.length === 0) {
+                    tbody.innerHTML =
+                        `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">No workers available. Add workers to track attendance.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                workers.forEach(w => {
+                    const att = appState.getAttendance(w.id, today);
+                    const status = att?.status || 'present';
+                    const paid = att?.payment || 0;
+                    const wageRate = this._calculateWageRate(w.id, today);
+                    const dayBalance = wageRate - paid;
+                    const totals = appState.getWorkerTotals(w.id);
+                    const netBalance = totals.netBalance;
+
+                    const dayBalClass = dayBalance > 0 ? 'balance-positive' : (dayBalance < 0 ? 'balance-negative' :
+                        'balance-zero');
+                    const netBalClass = netBalance > 0 ? 'balance-positive' : (netBalance < 0 ? 'balance-negative' :
+                        'balance-zero');
+
+                    html += `
+                        <tr>
+                            <td><span class="worker-name"><i class="fas fa-user-circle"></i> ${this._escapeHtml(w.name)}</span></td>
+                            <td>
+                                <div class="attendance-toggle">
+                                    <button data-id="${w.id}" data-val="present" class="${status === 'present' ? 'active' : ''}" aria-label="Mark present">P</button>
+                                    <button data-id="${w.id}" data-val="absent" class="${status === 'absent' ? 'active' : ''}" aria-label="Mark absent">A</button>
+                                    <button data-id="${w.id}" data-val="half" class="${status === 'half' ? 'active' : ''}" aria-label="Mark half day">½</button>
+                                </div>
+                            </td>
+                            <td><span class="wage-rate-display">₹ ${wageRate}</span></td>
+                            <td><input class="paid-input" type="number" data-id="${w.id}" value="${paid}" min="0" step="10" aria-label="Payment amount" /></td>
+                            <td><span class="balance-amount ${dayBalClass}">${dayBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(dayBalance)}</span></td>
+                            <td><span class="balance-amount balance-zero">₹ ${totals.totalWage}</span></td>
+                            <td><span class="balance-amount balance-zero">₹ ${totals.totalPaid}</span></td>
+                            <td><span class="balance-amount ${netBalClass}">${netBalance >= 0 ? '₹ ' : '-₹ '}${Math.abs(netBalance)}</span></td>
+                            <td><button class="profile-btn" data-id="${w.id}" aria-label="View profile"><i class="fas fa-address-card"></i> View</button></td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+
+                // Bind attendance toggle events
+                tbody.querySelectorAll('.attendance-toggle button').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        await this._handleAttendanceChange(btn);
+                    });
+                });
+
+                // Bind payment input events
+                tbody.querySelectorAll('.paid-input').forEach(inp => {
+                    inp.addEventListener('change', async () => {
+                        await this._handlePaymentChange(inp);
+                    });
+                });
+
+                // Bind profile button events
+                tbody.querySelectorAll('.profile-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        appState.uiState.currentMonth = new Date().getMonth();
+                        appState.uiState.currentYear = new Date().getFullYear();
+                        this._openProfile(id);
+                    });
+                });
+            }
+
+            _updateStats() {
+                const workers = appState.workers;
+                const today = this._getTodayStr();
+
+                let presentCount = 0;
+                let paidToday = 0;
+                let totalAdvance = 0;
+
+                workers.forEach(w => {
+                    totalAdvance += w.advance || 0;
+                    const att = appState.getAttendance(w.id, today);
+                    if (att && att.status !== 'absent') {
+                        presentCount++;
+                        paidToday += att.payment || 0;
+                    }
+                });
+
+                this._getDom('totalWorkers').textContent = workers.length;
+                this._getDom('presentToday').textContent = presentCount;
+                this._getDom('paidToday').textContent = `₹ ${paidToday.toLocaleString()}`;
+                this._getDom('totalAdvance').textContent = `₹ ${totalAdvance.toLocaleString()}`;
+            }
+
+            _updateTodayDate() {
+                const now = new Date();
+                this._getDom('todayDate').textContent = now.toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            // ============================================================
+            //  WORKER CRUD OPERATIONS
+            // ============================================================
+            _openAddModal() {
+                this._getDom('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add Worker';
+                this._getDom('modalName').value = '';
+                this._getDom('modalRole').value = '';
+                this._getDom('modalDailyRate').value = '';
+                this._getDom('modalAdvance').value = '0';
+                this._hideModalErrors();
+                this._getDom('workerModal').dataset.mode = 'add';
+                this._getDom('workerModal').classList.add('active');
+            }
+
+            _openEditModal(id) {
+                const worker = appState.getWorker(id);
+                if (!worker) {
+                    toastManager.error('Worker not found');
+                    return;
+                }
+
+                this._getDom('modalTitle').innerHTML = '<i class="fas fa-user-pen"></i> Edit Worker';
+                this._getDom('modalName').value = worker.name;
+                this._getDom('modalRole').value = worker.role;
+                this._getDom('modalDailyRate').value = worker.daily_rate;
+                this._getDom('modalAdvance').value = worker.advance || 0;
+                this._hideModalErrors();
+                this._getDom('workerModal').dataset.mode = 'edit';
+                this._getDom('workerModal').dataset.workerId = id;
+                this._getDom('workerModal').classList.add('active');
+            }
+
+            _closeModal() {
+                this._getDom('workerModal').classList.remove('active');
+                this._hideModalErrors();
+            }
+
+            _hideModalErrors() {
+                document.querySelectorAll('.input-error').forEach(el => {
+                    el.classList.remove('show');
+                });
+            }
+
+            _showModalError(field) {
+                const errorEl = document.getElementById(field + 'Error');
+                if (errorEl) errorEl.classList.add('show');
+            }
+
+            async _saveWorker() {
+                if (this._isProcessing) return;
+
+                const name = this._getDom('modalName').value.trim();
+                const role = this._getDom('modalRole').value.trim();
+                const dailyRate = parseFloat(this._getDom('modalDailyRate').value);
+                const advance = parseFloat(this._getDom('modalAdvance').value) || 0;
+                const mode = this._getDom('workerModal').dataset.mode;
+                const workerId = parseInt(this._getDom('workerModal').dataset.workerId);
+
+                // Validate
+                let isValid = true;
+                this._hideModalErrors();
+
+                if (!name || name.length < 2) {
+                    this._showModalError('modalName');
+                    isValid = false;
+                }
+
+                if (!role || role.length < 2) {
+                    this._showModalError('modalRole');
+                    isValid = false;
+                }
+
+                if (isNaN(dailyRate) || dailyRate <= 0) {
+                    this._showModalError('modalRate');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    toastManager.warning('Please fix the errors in the form');
+                    return;
+                }
+
+                this._isProcessing = true;
+                loadingManager.show(mode === 'edit' ? 'Updating worker...' : 'Adding worker...');
+
+                try {
+                    const workerData = {
+                        name,
+                        role,
+                        daily_rate: dailyRate,
+                        advance: advance,
+                    };
+
+                    if (mode === 'edit' && workerId) {
+                        workerData.id = workerId;
+                    }
+
+                    const saved = await apiService.saveWorker(workerData);
+
+                    if (mode === 'edit') {
+                        const idx = appState.workers.findIndex(w => w.id === workerId);
+                        if (idx !== -1) {
+                            appState.workers[idx] = saved;
+                        }
+                        toastManager.success(`Worker "${saved.name}" updated successfully`);
+                    } else {
+                        appState.workers.push(saved);
+                        toastManager.success(`Worker "${saved.name}" added successfully`);
+                    }
+
+                    // Refresh attendance data for the worker
+                    if (saved.id) {
+                        const attendance = await apiService.getAttendance(saved.id);
+                        if (attendance.length > 0) {
+                            appState.setBulkAttendance(attendance);
+                        }
+                    }
+
+                    appState._notify('workers-updated');
+                    this._closeModal();
+                } catch (error) {
+                    console.error('Save worker error:', error);
+                    toastManager.error('Failed to save worker: ' + error.message);
+                } finally {
+                    this._isProcessing = false;
+                    loadingManager.hide();
+                }
+            }
+
+            async _deleteWorker(id) {
+                const worker = appState.getWorker(id);
+                if (!worker) return;
+
+                if (!confirm(`Are you sure you want to delete "${worker.name}"? This will also delete all their attendance records and cannot be undone.`)) {
+                    return;
+                }
+
+                if (this._isProcessing) return;
+
+                this._isProcessing = true;
+                loadingManager.show('Deleting worker...');
+
+                try {
+                    await apiService.deleteWorker(id);
+                    appState.workers = appState.workers.filter(w => w.id !== id);
+                    appState.clearAttendance(id);
+                    appState._notify('workers-updated');
+                    toastManager.success(`Worker "${worker.name}" deleted successfully`);
+                } catch (error) {
+                    console.error('Delete worker error:', error);
+                    toastManager.error('Failed to delete worker: ' + error.message);
+                } finally {
+                    this._isProcessing = false;
+                    loadingManager.hide();
+                }
+            }
+
+            // ============================================================
+            //  ATTENDANCE OPERATIONS
+            // ============================================================
+            async _handleAttendanceChange(btn) {
+                if (this._isProcessing) return;
+
+                const id = parseInt(btn.dataset.id);
+                const status = btn.dataset.val;
+                const worker = appState.getWorker(id);
+                const today = this._getTodayStr();
+
+                if (!worker) {
+                    toastManager.error('Worker not found');
+                    return;
+                }
+
+                // Calculate payment based on status
+                let payment = 0;
+                if (status === 'present') {
+                    payment = worker.daily_rate || 0;
+                } else if (status === 'half') {
+                    payment = Math.round((worker.daily_rate || 0) * 0.5);
+                } else {
+                    payment = 0;
+                }
+
+                // Update local state optimistically
+                const currentAtt = appState.getAttendance(id, today) || { status: 'present', payment: 0, remark: '' };
+                appState.setAttendance(id, today, {
+                    ...currentAtt,
+                    status: status,
+                    payment: payment,
+                });
+
+                // Update UI immediately
+                this._renderDailyTable();
+                this._updateStats();
+
+                // Save to server
+                this._isProcessing = true;
+                try {
+                    await apiService.saveAttendance([{
+                        worker_id: id,
+                        date: today,
+                        status: status,
+                        payment: payment,
+                        remark: currentAtt.remark || '',
+                    }]);
+
+                    // Refresh from server to ensure consistency
+                    const freshAttendance = await apiService.getAttendance(id);
+                    const freshMap = new Map();
+                    freshAttendance.forEach(att => {
+                        freshMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(id, freshMap);
+
+                    toastManager.success(`${worker.name} marked as ${status}`);
+                    this._renderDailyTable();
+                    this._updateStats();
+                } catch (error) {
+                    console.error('Attendance save error:', error);
+                    toastManager.error('Failed to save attendance: ' + error.message);
+
+                    // Revert to server state
+                    const serverAttendance = await apiService.getAttendance(id);
+                    const serverMap = new Map();
+                    serverAttendance.forEach(att => {
+                        serverMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(id, serverMap);
+                    this._renderDailyTable();
+                    this._updateStats();
+                } finally {
+                    this._isProcessing = false;
+                }
+            }
+
+            async _handlePaymentChange(input) {
+                if (this._isProcessing) return;
+
+                const id = parseInt(input.dataset.id);
+                let payment = parseFloat(input.value);
+                if (isNaN(payment) || payment < 0) payment = 0;
+
+                const worker = appState.getWorker(id);
+                const today = this._getTodayStr();
+
+                if (!worker) {
+                    toastManager.error('Worker not found');
+                    return;
+                }
+
+                // Update local state optimistically
+                const currentAtt = appState.getAttendance(id, today) || { status: 'present', payment: 0, remark: '' };
+                appState.setAttendance(id, today, {
+                    ...currentAtt,
+                    payment: payment,
+                });
+
+                // Update UI immediately
+                this._renderDailyTable();
+                this._updateStats();
+
+                // Save to server
+                this._isProcessing = true;
+                try {
+                    await apiService.saveAttendance([{
+                        worker_id: id,
+                        date: today,
+                        status: currentAtt.status || 'present',
+                        payment: payment,
+                        remark: currentAtt.remark || '',
+                    }]);
+
+                    toastManager.success(`Payment updated for ${worker.name}`);
+                } catch (error) {
+                    console.error('Payment save error:', error);
+                    toastManager.error('Failed to save payment: ' + error.message);
+
+                    // Revert
+                    const serverAttendance = await apiService.getAttendance(id);
+                    const serverMap = new Map();
+                    serverAttendance.forEach(att => {
+                        serverMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(id, serverMap);
+                    this._renderDailyTable();
+                    this._updateStats();
+                } finally {
+                    this._isProcessing = false;
+                }
+            }
+
+            // ============================================================
+            //  PROFILE OPERATIONS
+            // ============================================================
+            async _openProfile(workerId) {
+                const worker = appState.getWorker(workerId);
+                if (!worker) {
+                    toastManager.error('Worker not found');
+                    return;
+                }
+
+                appState.uiState.selectedWorkerId = workerId;
+
+                try {
+                    // Load fresh attendance data for this worker
+                    const attendance = await apiService.getAttendance(workerId);
+                    const attMap = new Map();
+                    attendance.forEach(att => {
+                        attMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(workerId, attMap);
+
+                    // Update UI
+                    this._getDom('profileWorkerName').textContent = worker.name;
+                    this._getDom('profileWorkerRole').textContent = worker.role;
+                    this._updateProfileSummary(workerId);
+                    this._renderCalendar(workerId);
+                    this._getDom('profilePageOverlay').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } catch (error) {
+                    console.error('Profile load error:', error);
+                    toastManager.error('Failed to load profile data: ' + error.message);
+                }
+            }
+
+            _closeProfile() {
+                this._getDom('profilePageOverlay').classList.remove('active');
+                appState.uiState.selectedWorkerId = null;
+                document.body.style.overflow = '';
+            }
+
+            _updateProfileSummary(workerId) {
+                const worker = appState.getWorker(workerId);
+                if (!worker) return;
+
+                const totals = appState.getWorkerTotals(workerId);
+
+                this._getDom('profileTotalWage').textContent = `₹ ${totals.totalWage.toLocaleString()}`;
+                this._getDom('profileTotalPaid').textContent = `₹ ${totals.totalPaid.toLocaleString()}`;
+                this._getDom('profileAdvance').textContent = `₹ ${(worker.advance || 0).toLocaleString()}`;
+                const balanceEl = this._getDom('profileBalance');
+                balanceEl.textContent = `₹ ${totals.netBalance.toLocaleString()}`;
+                balanceEl.className = 'value ' + (totals.netBalance >= 0 ? 'positive' : 'negative');
+            }
+
+            _renderCalendar(workerId) {
+                const worker = appState.getWorker(workerId);
+                if (!worker) return;
+
+                const { currentMonth, currentYear } = appState.uiState;
+                const dateObj = new Date(currentYear, currentMonth, 1);
+                this._getDom('monthLabel').textContent = dateObj.toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                const atts = appState._attendance.get(workerId) || new Map();
+
+                let gridHtml = '';
+                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                weekdays.forEach(day => {
+                    gridHtml += `<div class="day-header">${day}</div>`;
+                });
+
+                for (let i = 0; i < firstDay; i++) {
+                    gridHtml += `<div class="empty-day"></div>`;
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr =
+                        `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const entry = atts.get(dateStr) || { status: 'present', payment: 0, remark: '' };
+                    const status = entry.status || 'present';
+                    const payment = entry.payment || 0;
+                    const remark = entry.remark || '';
+
+                    gridHtml += `
+                        <div class="day-block" data-date="${dateStr}">
+                            <div class="day-label">
+                                <span>${day}</span>
+                                <span class="status-badge">${status}</span>
+                            </div>
+                            <div class="day-actions">
+                                <button class="${status === 'present' ? 'active-status' : ''}" data-status="present" aria-label="Mark present">P</button>
+                                <button class="${status === 'absent' ? 'active-status' : ''}" data-status="absent" aria-label="Mark absent">A</button>
+                                <button class="${status === 'half' ? 'active-status' : ''}" data-status="half" aria-label="Mark half day">½</button>
+                            </div>
+                            <div class="day-payment">
+                                <i class="fas fa-coins" style="color:var(--accent);"></i>
+                                <input type="number" class="day-payment-input" value="${payment}" min="0" step="10" placeholder="₹" aria-label="Payment amount" />
+                            </div>
+                            <div class="day-remark">
+                                <input type="text" class="day-remark-input" value="${this._escapeHtml(remark)}" placeholder="remark" aria-label="Remark" />
+                            </div>
+                        </div>
+                    `;
+                }
+
+                this._getDom('calendarGrid').innerHTML = gridHtml;
+
+                // Bind events for calendar
+                this._bindCalendarEvents(workerId);
+            }
+
+            _bindCalendarEvents(workerId) {
+                const calendarGrid = this._getDom('calendarGrid');
+
+                calendarGrid.querySelectorAll('.day-actions button').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const block = btn.closest('.day-block');
+                        const date = block.dataset.date;
+                        const status = btn.dataset.status;
+                        await this._updateCalendarAttendance(workerId, date, status);
+                    });
+                });
+
+                calendarGrid.querySelectorAll('.day-payment-input').forEach(inp => {
+                    inp.addEventListener('change', async () => {
+                        const block = inp.closest('.day-block');
+                        const date = block.dataset.date;
+                        const payment = parseFloat(inp.value) || 0;
+                        await this._updateCalendarPayment(workerId, date, payment);
+                    });
+                });
+
+                calendarGrid.querySelectorAll('.day-remark-input').forEach(inp => {
+                    inp.addEventListener('change', async () => {
+                        const block = inp.closest('.day-block');
+                        const date = block.dataset.date;
+                        const remark = inp.value.trim();
+                        await this._updateCalendarRemark(workerId, date, remark);
+                    });
+                });
+            }
+
+            async _updateCalendarAttendance(workerId, date, status) {
+                if (this._isProcessing) return;
+
+                const worker = appState.getWorker(workerId);
+                if (!worker) return;
+
+                let payment = 0;
+                if (status === 'present') {
+                    payment = worker.daily_rate || 0;
+                } else if (status === 'half') {
+                    payment = Math.round((worker.daily_rate || 0) * 0.5);
+                }
+
+                const currentAtt = appState.getAttendance(workerId, date) || { status: 'present', payment: 0,
+                    remark: '' };
+                appState.setAttendance(workerId, date, {
+                    ...currentAtt,
+                    status: status,
+                    payment: payment,
+                });
+
+                this._renderCalendar(workerId);
+                this._updateProfileSummary(workerId);
+                this._renderDailyTable();
+                this._updateStats();
+
+                this._isProcessing = true;
+                try {
+                    await apiService.saveAttendance([{
+                        worker_id: workerId,
+                        date: date,
+                        status: status,
+                        payment: payment,
+                        remark: currentAtt.remark || '',
+                    }]);
+
+                    // Refresh from server
+                    const freshAttendance = await apiService.getAttendance(workerId);
+                    const freshMap = new Map();
+                    freshAttendance.forEach(att => {
+                        freshMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(workerId, freshMap);
+
+                    toastManager.success(`Attendance updated for ${date}`);
+                    this._renderCalendar(workerId);
+                    this._updateProfileSummary(workerId);
+                    this._renderDailyTable();
+                    this._updateStats();
+                } catch (error) {
+                    console.error('Calendar attendance error:', error);
+                    toastManager.error('Failed to update attendance: ' + error.message);
+                    // Revert
+                    const serverAttendance = await apiService.getAttendance(workerId);
+                    const serverMap = new Map();
+                    serverAttendance.forEach(att => {
+                        serverMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(workerId, serverMap);
+                    this._renderCalendar(workerId);
+                    this._updateProfileSummary(workerId);
+                } finally {
+                    this._isProcessing = false;
+                }
+            }
+
+            async _updateCalendarPayment(workerId, date, payment) {
+                if (this._isProcessing) return;
+
+                const currentAtt = appState.getAttendance(workerId, date) || { status: 'present', payment: 0,
+                    remark: '' };
+                appState.setAttendance(workerId, date, {
+                    ...currentAtt,
+                    payment: payment,
+                });
+
+                this._renderCalendar(workerId);
+                this._updateProfileSummary(workerId);
+
+                this._isProcessing = true;
+                try {
+                    await apiService.saveAttendance([{
+                        worker_id: workerId,
+                        date: date,
+                        status: currentAtt.status || 'present',
+                        payment: payment,
+                        remark: currentAtt.remark || '',
+                    }]);
+
+                    toastManager.success(`Payment updated for ${date}`);
+                    this._renderDailyTable();
+                    this._updateStats();
+                } catch (error) {
+                    console.error('Calendar payment error:', error);
+                    toastManager.error('Failed to update payment: ' + error.message);
+                    // Revert
+                    const serverAttendance = await apiService.getAttendance(workerId);
+                    const serverMap = new Map();
+                    serverAttendance.forEach(att => {
+                        serverMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(workerId, serverMap);
+                    this._renderCalendar(workerId);
+                    this._updateProfileSummary(workerId);
+                } finally {
+                    this._isProcessing = false;
+                }
+            }
+
+            async _updateCalendarRemark(workerId, date, remark) {
+                if (this._isProcessing) return;
+
+                const currentAtt = appState.getAttendance(workerId, date) || { status: 'present', payment: 0,
+                    remark: '' };
+                appState.setAttendance(workerId, date, {
+                    ...currentAtt,
+                    remark: remark,
+                });
+
+                this._isProcessing = true;
+                try {
+                    await apiService.saveAttendance([{
+                        worker_id: workerId,
+                        date: date,
+                        status: currentAtt.status || 'present',
+                        payment: currentAtt.payment || 0,
+                        remark: remark,
+                    }]);
+
+                    toastManager.success('Remark saved');
+                } catch (error) {
+                    console.error('Calendar remark error:', error);
+                    toastManager.error('Failed to save remark: ' + error.message);
+                    // Revert
+                    const serverAttendance = await apiService.getAttendance(workerId);
+                    const serverMap = new Map();
+                    serverAttendance.forEach(att => {
+                        serverMap.set(att.date, {
+                            status: att.status,
+                            payment: att.payment || 0,
+                            remark: att.remark || '',
+                        });
+                    });
+                    appState._attendance.set(workerId, serverMap);
+                    this._renderCalendar(workerId);
+                } finally {
+                    this._isProcessing = false;
+                }
+            }
+
+            _changeMonth(delta) {
+                const { currentMonth, currentYear } = appState.uiState;
+                let newMonth = currentMonth + delta;
+                let newYear = currentYear;
+
+                if (newMonth < 0) {
+                    newMonth = 11;
+                    newYear--;
+                } else if (newMonth > 11) {
+                    newMonth = 0;
+                    newYear++;
+                }
+
+                appState.uiState.currentMonth = newMonth;
+                appState.uiState.currentYear = newYear;
+
+                if (appState.uiState.selectedWorkerId) {
+                    this._renderCalendar(appState.uiState.selectedWorkerId);
+                }
+            }
+
+            // ============================================================
+            //  UTILITY FUNCTIONS
+            // ============================================================
+            _getTodayStr() {
+                return new Date().toISOString().split('T')[0];
+            }
+
+            _calculateWageRate(workerId, date) {
+                const worker = appState.getWorker(workerId);
+                if (!worker) return 0;
+
+                const att = appState.getAttendance(workerId, date);
+                if (!att || att.status === 'absent') return 0;
+                if (att.status === 'half') return Math.round((worker.daily_rate || 0) * 0.5);
+                return worker.daily_rate || 0;
+            }
+
+            _escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // ============================================================
+            //  INIT
+            // ============================================================
+            async init() {
+                console.log('🚀 Jaiswal Workforce Management System v2.0');
+                console.log('📅 ' + new Date().toISOString());
+
+                if (!supabaseClient) {
+                    console.error('❌ Supabase client not available');
+                    toastManager.error('Failed to initialize. Please refresh the page.');
+                    return;
+                }
+
+                try {
+                    // Check if there's a stored session
+                    const session = await apiService.getSession();
+
+                    if (session?.session) {
+                        // User is already authenticated
+                        appState.currentUser = session.session.user;
+                        await this._loadData();
+                        this._updateTodayDate();
+                        toastManager.success('Welcome back!');
+                    } else {
+                        // Show login
+                        this._getDom('loginScreen').style.display = 'flex';
+                        this._getDom('dashboardScreen').style.display = 'none';
+
+                        // Pre-fill demo credentials for convenience (remove in production)
+                        // this._getDom('emailInput').value = '';
+                        // this._getDom('passwordInput').value = '';
+                    }
+
+                    this._initialized = true;
+
+                    // Set up auto-refresh every 5 minutes
+                    setInterval(() => {
+                        if (appState.isAuthenticated) {
+                            this._loadData().catch(err => {
+                                console.warn('Auto-refresh failed:', err);
+                            });
+                        }
+                    }, 300000);
+
+                } catch (error) {
+                    console.error('❌ Initialization error:', error);
+                    toastManager.error('Failed to initialize: ' + error.message);
+                    this._getDom('loginScreen').style.display = 'flex';
+                    this._getDom('dashboardScreen').style.display = 'none';
+                }
+            }
         }
+
+        // ============================================================
+        //  START APPLICATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new AppController();
+            app.init();
+
+            // Expose for debugging (remove in production)
+            // window.__app = app;
+            // window.__state = appState;
+        });
     </script>
 </body>
 </html>
